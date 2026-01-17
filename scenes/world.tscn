@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3 uid="uid://b8d5a7e6f3g2"]
+
+[ext_resource type="PackedScene" uid="uid://c5xk8y9z4w21" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="2_spawner"]
+[ext_resource type="PackedScene" uid="uid://c8j6y4v2m1n9" path="res://scenes/ui.tscn" id="3_ui"]
+
+[ext_resource type="Shader" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
+
+shader = ExtResource("4_sky_shader")
+
+[sub_resource type="Sky" id="Sky_y6k4m"]
+sky_material = SubResource("ShaderMaterial_stars")
+
+[sub_resource type="Environment" id="Environment_q1w2e"]
+background_mode = 2
+sky = SubResource("Sky_y6k4m")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_p3n8b"]
+radius = 40.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_k9m2n"]
+radius = 40.0
+height = 80.0
+
+[node name="World" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_q1w2e")
+
+[node name="Planet" type="StaticBody3D" parent="."]
+collision_layer = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Planet"]
+shape = SubResource("SphereShape3D_p3n8b")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Planet"]
+mesh = SubResource("SphereMesh_k9m2n")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42, 0)
+
+[node name="EnemySpawner" type="Node3D" parent="."]
+script = ExtResource("2_spawner")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" parent="CanvasLayer" instance=ExtResource("3_ui")]
+

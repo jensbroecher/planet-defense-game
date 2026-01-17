@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://d2k4l8m1n0p9"]
+
+[ext_resource type="PackedScene" uid="uid://c8j6y4v2q1x5" path="res://scenes/structures/structure.tscn" id="1_structure"]
+[ext_resource type="Script" path="res://scripts/turret.gd" id="2_turret"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j8k2l"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_head"]
+material = SubResource("StandardMaterial3D_j8k2l")
+size = Vector3(1, 0.5, 2)
+
+[node name="Turret" instance=ExtResource("1_structure")]
+script = ExtResource("2_turret")
+
+[node name="Head" type="Node3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Head" index="0"]
+mesh = SubResource("BoxMesh_head")
+
+[node name="Muzzle" type="Marker3D" parent="Head" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
