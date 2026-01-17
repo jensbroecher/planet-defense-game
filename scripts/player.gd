@@ -95,31 +95,62 @@ var build_cooldown = 0.0
 const BUILD_RANGE = 20.0
 var ghost_structure : Node3D = null
 
+var structure_scenes = [
+	"res://scenes/structures/turret.tscn",
+	"res://scenes/structures/missile_turret.tscn",
+	"res://scenes/structures/laser_turret.tscn"
+]
+var current_structure_index = 0
+
 func _unhandled_input_build(event):
 	if event.is_action_pressed("build_mode"):
 		is_build_mode = not is_build_mode
 		if is_build_mode:
 			print("Build Mode ON")
 			if ghost_structure == null:
-				# For now, just a visual indicator. In real game, load selected structure.
-				var mesh = MeshInstance3D.new()
-				mesh.mesh = BoxMesh.new()
-				mesh.mesh.size = Vector3(2,2,2)
-				# Create a transparent material
-				var mat = StandardMaterial3D.new()
-				mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-				mat.albedo_color = Color(0, 1, 0, 0.5)
-				mesh.mesh.material = mat
-				ghost_structure = mesh
-				get_parent().add_child(ghost_structure)
+				create_ghost()
 		else:
 			print("Build Mode OFF")
 			if ghost_structure:
 				ghost_structure.queue_free()
 				ghost_structure = null
 
-	if is_build_mode and event.is_action_pressed("fire"):
-		try_build()
+	if is_build_mode:
+		if event is InputEventKey and event.pressed:
+			if event.keycode == KEY_1: 
+				current_structure_index = 0
+				update_ghost_visual()
+			if event.keycode == KEY_2: 
+				current_structure_index = 1
+				update_ghost_visual()
+			if event.keycode == KEY_3: 
+				current_structure_index = 2
+				update_ghost_visual()
+		
+		if event.is_action_pressed("fire"):
+			try_build()
+
+func create_ghost():
+	var mesh = MeshInstance3D.new()
+	mesh.mesh = BoxMesh.new()
+	mesh.mesh.size = Vector3(2,2,2)
+	# Create a transparent material
+	var mat = StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0, 1, 0, 0.5)
+	mesh.mesh.material = mat
+	ghost_structure = mesh
+	get_parent().add_child(ghost_structure)
+	update_ghost_visual()
+
+func update_ghost_visual():
+	if ghost_structure and ghost_structure.mesh and ghost_structure.mesh.material:
+		var color = Color(0, 1, 0, 0.5)
+		if current_structure_index == 1: color = Color(0, 0, 1, 0.5) # Missile Blue
+		if current_structure_index == 2: color = Color(1, 1, 0, 0.5) # Laser Yellow
+		ghost_structure.mesh.material.albedo_color = color
+	
+	# Emit signal or update UI here if we had reference
 
 func _input(event):
 	_unhandled_input(event)
@@ -131,9 +162,10 @@ func try_build():
 		var point = result.position
 		var normal = result.normal
 		
-		# Load the structure scene (hardcoded for now)
-		var turret_scene = load("res://scenes/structures/turret.tscn")
-		var structure = turret_scene.instantiate()
+		# Load the structure scene
+		var path = structure_scenes[current_structure_index]
+		var scene = load(path)
+		var structure = scene.instantiate()
 		get_parent().add_child(structure)
 		
 		structure.global_position = point

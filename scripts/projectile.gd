@@ -1,8 +1,8 @@
 extends Area3D
 
-var speed = 40.0
-var damage = 10
-var life_time = 5.0
+@export var speed = 40.0
+@export var damage = 10
+@export var life_time = 5.0
 
 func _ready():
 	# Delete after life_time seconds

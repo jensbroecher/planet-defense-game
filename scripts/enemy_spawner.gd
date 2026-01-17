@@ -1,10 +1,21 @@
 extends Node3D
 
-@export var enemy_scene : PackedScene
 @export var spawn_interval = 2.0
 @export var spawn_radius = 100.0
 
+var enemy_scenes = [
+	"res://scenes/enemies/enemy.tscn",
+	"res://scenes/enemies/enemy_heavy.tscn",
+	"res://scenes/enemies/enemy_fast.tscn"
+]
+
+var loaded_scenes = []
+
 var timer = 0.0
+
+func _ready():
+	for path in enemy_scenes:
+		loaded_scenes.append(load(path))
 
 func _process(delta):
 	timer -= delta
@@ -13,13 +24,11 @@ func _process(delta):
 		timer = spawn_interval
 
 func spawn_enemy():
-	if not enemy_scene:
-		enemy_scene = load("res://scenes/enemies/enemy.tscn")
-		
-	if enemy_scene:
-		var enemy = enemy_scene.instantiate()
+	if loaded_scenes.size() > 0:
+		var scene = loaded_scenes.pick_random()
+		var enemy = scene.instantiate()
 		get_parent().add_child(enemy)
-		print("Spawned Enemy at ", Time.get_time_string_from_system())
+		print("Spawned Enemy: ", enemy.name, " at ", Time.get_time_string_from_system())
 		
 		# Random point on a sphere surface (approximate)
 		var theta = randf() * 2 * PI

@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://laser_turret_id"]
+
+[ext_resource type="PackedScene" uid="uid://c8j6y4v2q1x5" path="res://scenes/structures/structure.tscn" id="1_struct_l"]
+[ext_resource type="Script" path="res://scripts/turret.gd" id="2_turret_l"]
+[ext_resource type="PackedScene" uid="uid://laser_bolt_id" path="res://scenes/laser_bolt.tscn" id="3_laser_proj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yellow"]
+albedo_color = Color(1, 0.8, 0, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_head_laser"]
+material = SubResource("StandardMaterial3D_yellow")
+top_radius = 0.3
+bottom_radius = 0.6
+height = 1.5
+
+[node name="LaserTurret" instance=ExtResource("1_struct_l")]
+script = ExtResource("2_turret_l")
+fire_rate = 0.2
+range = 50.0
+projectile_scene = ExtResource("3_laser_proj")
+
+[node name="Head" type="Node3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 2.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Head" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+mesh = SubResource("CylinderMesh_head_laser")
+
+[node name="Muzzle" type="Marker3D" parent="Head" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)

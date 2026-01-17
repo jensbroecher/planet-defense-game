@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3 uid="uid://missile_turret_id"]
+
+[ext_resource type="PackedScene" uid="uid://c8j6y4v2q1x5" path="res://scenes/structures/structure.tscn" id="1_struct_m"]
+[ext_resource type="Script" path="res://scripts/turret.gd" id="2_turret_m"]
+[ext_resource type="PackedScene" uid="uid://missile_proj_id" path="res://scenes/missile.tscn" id="3_missile_proj"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
+albedo_color = Color(0, 0.2, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_head_blue"]
+material = SubResource("StandardMaterial3D_blue")
+size = Vector3(1.2, 0.8, 2.5)
+
+[node name="MissileTurret" instance=ExtResource("1_struct_m")]
+script = ExtResource("2_turret_m")
+fire_rate = 3.0
+range = 80.0
+projectile_scene = ExtResource("3_missile_proj")
+
+[node name="Head" type="Node3D" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Head" index="0"]
+mesh = SubResource("BoxMesh_head_blue")
+
+[node name="Muzzle" type="Marker3D" parent="Head" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.5)
