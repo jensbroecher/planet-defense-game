@@ -13,6 +13,9 @@ extends CharacterBody3D
 # Vertical angle limits
 var min_pitch = -80.0
 var max_pitch = 80.0
+var min_zoom = 5.0
+var max_zoom = 20.0
+var zoom_speed = 1.0
 
 func _ready():
 	add_to_group("player")
@@ -30,6 +33,18 @@ func _unhandled_input(event):
 		camera_rig.rotate_y(-event.relative.x * mouse_sensitivity)
 		spring_arm.rotate_x(-event.relative.y * mouse_sensitivity)
 		spring_arm.rotation_degrees.x = clamp(spring_arm.rotation_degrees.x, min_pitch, max_pitch)
+	
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			spring_arm.spring_length = clamp(spring_arm.spring_length - zoom_speed, min_zoom, max_zoom)
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			spring_arm.spring_length = clamp(spring_arm.spring_length + zoom_speed, min_zoom, max_zoom)
+
+	if event is InputEventMagnifyGesture:
+		# Factor > 1 means pinch out (magnify/zoom in) -> shorten arm
+		# Factor < 1 means pinch in (shrink/zoom out) -> lengthen arm
+		var new_length = spring_arm.spring_length / event.factor
+		spring_arm.spring_length = clamp(new_length, min_zoom, max_zoom)
 		
 	if event.is_action_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -98,8 +113,10 @@ var ghost_structure : Node3D = null
 var structure_scenes = [
 	"res://scenes/structures/turret.tscn",
 	"res://scenes/structures/missile_turret.tscn",
-	"res://scenes/structures/laser_turret.tscn"
+	"res://scenes/structures/laser_turret.tscn",
+	"res://scenes/structures/power_plant.tscn"
 ]
+var structure_costs = [50, 100, 75, 60]
 var current_structure_index = 0
 
 func _unhandled_input_build(event):
@@ -126,6 +143,9 @@ func _unhandled_input_build(event):
 			if event.keycode == KEY_3: 
 				current_structure_index = 2
 				update_ghost_visual()
+			if event.keycode == KEY_4: 
+				current_structure_index = 3
+				update_ghost_visual()
 		
 		if event.is_action_pressed("fire"):
 			try_build()
@@ -148,6 +168,7 @@ func update_ghost_visual():
 		var color = Color(0, 1, 0, 0.5)
 		if current_structure_index == 1: color = Color(0, 0, 1, 0.5) # Missile Blue
 		if current_structure_index == 2: color = Color(1, 1, 0, 0.5) # Laser Yellow
+		if current_structure_index == 3: color = Color(0, 1, 1, 0.5) # Power Cyan
 		ghost_structure.mesh.material.albedo_color = color
 	
 	# Emit signal or update UI here if we had reference
@@ -157,26 +178,32 @@ func _input(event):
 	_unhandled_input_build(event)
 
 func try_build():
+	var cost = structure_costs[current_structure_index]
+	if not GameManager.has_credits(cost):
+		print("Not enough credits! Need: ", cost)
+		return
+
 	var result = get_raycast_collision()
 	if result:
 		var point = result.position
 		var normal = result.normal
 		
-		# Load the structure scene
-		var path = structure_scenes[current_structure_index]
-		var scene = load(path)
-		var structure = scene.instantiate()
-		get_parent().add_child(structure)
-		
-		structure.global_position = point
-		# Align structure up with normal
-		if structure.global_transform.basis.y != normal:
-			# Look at logic for aligning Y to normal
-			var new_basis = Basis()
-			new_basis.y = normal
-			new_basis.x = -structure.global_transform.basis.z.cross(normal).normalized()
-			new_basis.z = new_basis.x.cross(normal).normalized()
-			structure.global_transform.basis = new_basis
+		if GameManager.spend_credits(cost):
+			# Load the structure scene
+			var path = structure_scenes[current_structure_index]
+			var scene = load(path)
+			var structure = scene.instantiate()
+			get_parent().add_child(structure)
+			
+			structure.global_position = point
+			# Align structure up with normal
+			if structure.global_transform.basis.y != normal:
+				# Look at logic for aligning Y to normal
+				var new_basis = Basis()
+				new_basis.y = normal
+				new_basis.x = -structure.global_transform.basis.z.cross(normal).normalized()
+				new_basis.z = new_basis.x.cross(normal).normalized()
+				structure.global_transform.basis = new_basis
 
 func _process(delta):
 	if is_build_mode and ghost_structure:

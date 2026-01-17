@@ -18,6 +18,10 @@ func _ready():
 func _process(delta):
 	fire_timer -= delta
 	
+	# Check Power
+	if not check_power():
+		return # No power, idle
+
 	if target == null or not is_instance_valid(target):
 		find_target()
 	
@@ -40,6 +44,13 @@ func _process(delta):
 		if fire_timer <= 0:
 			shoot()
 			fire_timer = fire_rate
+
+func check_power():
+	var sources = get_tree().get_nodes_in_group("power_sources")
+	for s in sources:
+		if global_position.distance_to(s.global_position) <= 50.0:
+			return true
+	return false
 
 func find_target():
 	# Find nearest enemy in group "enemies"

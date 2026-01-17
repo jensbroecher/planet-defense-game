@@ -26,6 +26,7 @@ func take_damage(amount):
 		die()
 
 func die():
+	GameManager.add_credits(10)
 	queue_free()
 
 func _physics_process(delta):
