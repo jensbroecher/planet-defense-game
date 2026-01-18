@@ -11,30 +11,68 @@ extends CharacterBody3D
 @onready var visual_mesh = $MeshInstance3D
 
 # Vertical angle limits
+# Vertical angle limits
 var min_pitch = -80.0
 var max_pitch = 80.0
 var min_zoom = 5.0
 var max_zoom = 20.0
 var zoom_speed = 1.0
 
+# Health
+@export var max_health = 100
+var current_health
+@onready var hp_label = $HPLabel
+
 func _ready():
 	add_to_group("player")
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	# Set floor max angle to support walking on sphere (though gravity usually handles this)
 	floor_max_angle = deg_to_rad(60.0)
+	current_health = max_health
+	update_hp_label()
+	
+	# FORCE SpringArm to only collide with Planet (Layer 1)
+	spring_arm.collision_mask = 1
+	
+	print("Player Ready at: ", global_position)
+	print("SpringArm Mask: ", spring_arm.collision_mask)
+	
+	# Debug Camera
+	# print("SpringArm Hit Len: ", spring_arm.get_hit_length(), " | Actual: ", spring_arm.spring_length)
 
 func take_damage(amount):
-	print("Player took damage: ", amount)
-	# Todo: Health Logic
+	current_health -= amount
+	print("Player took damage: ", amount, " Health: ", current_health)
+	update_hp_label()
+	
+	if current_health <= 0:
+		die()
+
+func update_hp_label():
+	if hp_label:
+		hp_label.text = str(int(current_health))
+
+func die():
+	print("Player Died!")
+	# Reload current scene for now
+	get_tree().reload_current_scene()
 	
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
+		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+			return
+			
 		# Rotate SpringArm horizontally (around relative Y) and vertically (around relative X)
 		camera_rig.rotate_y(-event.relative.x * mouse_sensitivity)
 		spring_arm.rotate_x(-event.relative.y * mouse_sensitivity)
 		spring_arm.rotation_degrees.x = clamp(spring_arm.rotation_degrees.x, min_pitch, max_pitch)
 	
 	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+				# get_viewport().set_input_as_handled() # Optional: consume the click so we don't shoot immediately?
+		
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			spring_arm.spring_length = clamp(spring_arm.spring_length - zoom_speed, min_zoom, max_zoom)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:

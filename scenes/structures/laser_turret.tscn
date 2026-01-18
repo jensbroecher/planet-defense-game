@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2q1x5" path="res://scenes/structures/structure.tscn" id="1_struct_l"]
 [ext_resource type="Script" path="res://scripts/turret.gd" id="2_turret_l"]
 [ext_resource type="PackedScene" uid="uid://laser_bolt_id" path="res://scenes/laser_bolt.tscn" id="3_laser_proj"]
+[ext_resource type="AudioStream" path="res://sounds/laser-312360.mp3" id="4_sound"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yellow"]
 albedo_color = Color(1, 0.8, 0, 1)
@@ -28,3 +29,8 @@ mesh = SubResource("CylinderMesh_head_laser")
 
 [node name="Muzzle" type="Marker3D" parent="Head" index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." index="3"]
+stream = ExtResource("4_sound")
+unit_size = 20.0
+pitch_scale = 1.2

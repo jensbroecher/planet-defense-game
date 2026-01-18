@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://enemy_ground_id"]
+
+[ext_resource type="Script" path="res://scripts/enemy_ground.gd" id="1_enemy_g"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_green_enemy"]
+albedo_color = Color(0, 0.5, 0, 1)
+emission_enabled = true
+emission = Color(0, 0.5, 0, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+material = SubResource("StandardMaterial3D_green_enemy")
+size = Vector3(1, 1, 1)
+
+[node name="EnemyGround" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_enemy_g")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("BoxMesh_ground")

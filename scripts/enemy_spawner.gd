@@ -1,12 +1,13 @@
 extends Node3D
 
 @export var spawn_interval = 2.0
-@export var spawn_radius = 100.0
+@export var spawn_radius = 150.0
 
 var enemy_scenes = [
 	"res://scenes/enemies/enemy.tscn",
 	"res://scenes/enemies/enemy_heavy.tscn",
-	"res://scenes/enemies/enemy_fast.tscn"
+	"res://scenes/enemies/enemy_fast.tscn",
+	"res://scenes/enemies/dropship.tscn"
 ]
 
 var loaded_scenes = []

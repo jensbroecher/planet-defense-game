@@ -1,0 +1,27 @@
+extends "res://scripts/structure.gd"
+
+# Healing Logic
+var healing_rate = 10.0 # HP per second
+var player_in_range = null
+
+func _process(delta):
+	if player_in_range and is_instance_valid(player_in_range):
+		# Heal player
+		if player_in_range.current_health < player_in_range.max_health:
+			player_in_range.current_health += healing_rate * delta
+			if player_in_range.current_health > player_in_range.max_health:
+				player_in_range.current_health = player_in_range.max_health
+			
+			# Update player label visual (we need to access method)
+			if player_in_range.has_method("update_hp_label"):
+				player_in_range.update_hp_label()
+
+func _on_healing_zone_body_entered(body):
+	if body.is_in_group("player"):
+		player_in_range = body
+		print("Player entered healing zone")
+
+func _on_healing_zone_body_exited(body):
+	if body == player_in_range:
+		player_in_range = null
+		print("Player left healing zone")

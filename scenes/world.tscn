@@ -1,6 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://b8d5a7e6f3g2"]
 
 [ext_resource type="PackedScene" uid="uid://c5xk8y9z4w21" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://hq_structure_id" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
 [ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2m1n9" path="res://scenes/ui.tscn" id="3_ui"]
 
@@ -44,8 +45,11 @@ shape = SubResource("SphereShape3D_p3n8b")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Planet"]
 mesh = SubResource("SphereMesh_k9m2n")
 
+[node name="HQ" parent="." instance=ExtResource("1_hq_struct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0)
+
 [node name="Player" parent="." instance=ExtResource("1_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 42, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 42, 0)
 
 [node name="EnemySpawner" type="Node3D" parent="."]
 script = ExtResource("2_spawner")

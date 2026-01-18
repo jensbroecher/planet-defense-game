@@ -27,7 +27,7 @@ func _process(delta):
 	
 	if target:
 		var dist = global_position.distance_to(target.global_position)
-		if dist > range:
+		if dist > range or not check_line_of_sight(target):
 			target = null
 			return
 
@@ -52,6 +52,18 @@ func check_power():
 			return true
 	return false
 
+func check_line_of_sight(target_node):
+	var space_state = get_world_3d().direct_space_state
+	var origin = muzzle.global_position
+	var end = target_node.global_position
+	var query = PhysicsRayQueryParameters3D.create(origin, end)
+	query.collision_mask = 1 # Check collision with Planet (Layer 1) only
+	
+	var result = space_state.intersect_ray(query)
+	if result:
+		return false # Blocked by planet
+	return true
+
 func find_target():
 	# Find nearest enemy in group "enemies"
 	# We need to add enemies to group "enemies"
@@ -73,3 +85,7 @@ func shoot():
 		get_parent().add_child(proj)
 		proj.global_position = muzzle.global_position
 		proj.look_at(target.global_position)
+		
+		# Play audio if exists
+		if has_node("AudioStreamPlayer3D"):
+			$AudioStreamPlayer3D.play()

@@ -19,6 +19,7 @@ size = Vector3(3, 3, 3)
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_enemy_h")
+attack_type = 2
 move_speed = 5.0
 max_health = 100
 

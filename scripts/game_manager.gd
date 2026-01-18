@@ -2,7 +2,15 @@ extends Node
 
 signal credits_changed(new_amount)
 
-var credits = 100
+var credits = 500
+var passive_income_accumulator = 0.0
+
+func _process(delta):
+	passive_income_accumulator += delta
+	if passive_income_accumulator >= 1.0:
+		passive_income_accumulator -= 1.0
+		add_credits(1)
+
 
 func add_credits(amount):
 	credits += amount
