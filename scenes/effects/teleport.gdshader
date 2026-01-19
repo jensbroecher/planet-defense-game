@@ -50,4 +50,10 @@ void fragment() {
 	// Add a "scanning" line
 	float scan_line = step(abs(UV.y - progress), 0.02);
 	EMISSION += vec3(1.0, 1.0, 1.0) * scan_line * 5.0;
+	
+	// Final Flash
+	float flash = smoothstep(0.85, 1.0, progress);
+	EMISSION += vec3(2.0, 2.0, 2.0) * flash * 10.0;
+	// Force alpha to 1 during flash to hide internal geometry if distinct parts
+	ALPHA = mix(ALPHA, 1.0, flash);
 }

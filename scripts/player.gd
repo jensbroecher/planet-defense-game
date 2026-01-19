@@ -25,6 +25,9 @@ var current_health
 
 var is_dead = false
 var explosion_scene = preload("res://scenes/effects/explosion.tscn")
+var dust_trail_scene = preload("res://scenes/effects/dust_trail.tscn")
+var dust_trail_node : GPUParticles3D = null
+var dust_grace_timer = 0.0
 
 func _ready():
 	add_to_group("player")
@@ -36,6 +39,20 @@ func _ready():
 	
 	# FORCE SpringArm to only collide with Planet (Layer 1)
 	spring_arm.collision_mask = 1
+	
+	
+	if dust_trail_scene:
+		dust_trail_node = dust_trail_scene.instantiate()
+		var tank_pivot = get_node_or_null("TankPivot")
+		if tank_pivot:
+			tank_pivot.add_child(dust_trail_node)
+			# Pivot is rotated 180 (scale -1) sometimes or model is reversed?
+			# TankModel is rotated 1.5, 1.5, -1.5? (Scale of 1.5 with Z flipped?)
+			# Let's adjust local position. If model faces -Z, behind is +Z.
+			dust_trail_node.position = Vector3(0, 0.5, 2.0) 
+		else:
+			add_child(dust_trail_node)
+			dust_trail_node.position = Vector3(0, 0.5, 2.0)
 	
 	print("Player Ready at: ", global_position)
 	print("SpringArm Mask: ", spring_arm.collision_mask)
@@ -187,6 +204,19 @@ func _physics_process(delta):
 		velocity = vert_vel + tan_vel
 
 	move_and_slide()
+	
+	# Dust Trail Logic
+	if dust_trail_node:
+		if is_on_floor() and velocity.length() > 1.0:
+			dust_grace_timer = 0.2
+			
+		if dust_grace_timer > 0:
+			dust_grace_timer -= delta
+			if not dust_trail_node.emitting:
+				dust_trail_node.emitting = true
+		else:
+			if dust_trail_node.emitting:
+				dust_trail_node.emitting = false
 
 # --- Building System ---
 var is_build_mode = false
@@ -301,6 +331,14 @@ func try_build():
 				new_basis.z = new_basis.x.cross(normal).normalized()
 				structure.global_transform.basis = new_basis
 
+			# Check validity before finalizing
+			if not check_placement_validity(point, structure.global_transform.basis):
+				structure.queue_free()
+				GameManager.notify("Construction not possible", 2.0)
+				# Restore credits
+				GameManager.add_credits(cost)
+				return
+
 func _process(delta):
 	_handle_auto_shoot()
 	if is_build_mode and ghost_structure:
@@ -317,6 +355,20 @@ func _process(delta):
 			new_basis.x = cam_forward.cross(normal).normalized()
 			new_basis.z = new_basis.x.cross(normal).normalized()
 			ghost_structure.global_transform.basis = new_basis
+			
+			# Update Ghost Color based on validity
+			var is_valid = check_placement_validity(ghost_structure.global_position, new_basis)
+			var target_color = Color(0, 1, 0, 0.5)
+			if current_structure_index == 1: target_color = Color(0, 0, 1, 0.5)
+			if current_structure_index == 2: target_color = Color(1, 1, 0, 0.5)
+			if current_structure_index == 3: target_color = Color(0, 1, 1, 0.5)
+			if current_structure_index == 4: target_color = Color(1, 0.8, 0, 0.5)
+			
+			if not is_valid:
+				target_color = Color(1, 0, 0, 0.5)
+			
+			if ghost_structure.mesh and ghost_structure.mesh.material:
+				ghost_structure.mesh.material.albedo_color = target_color
 		else:
 			ghost_structure.visible = false
 
@@ -328,6 +380,24 @@ func get_raycast_collision():
 	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
 	query.collision_mask = 1 # Only collide with planet (Layer 1)
 	return space_state.intersect_ray(query)
+
+func check_placement_validity(pos: Vector3, basis: Basis) -> bool:
+	var space_state = get_world_3d().direct_space_state
+	var params = PhysicsShapeQueryParameters3D.new()
+	var shape = BoxShape3D.new()
+	# Structure size is 2x2x2. We check slightly smaller to allow touching but not overlapping center?
+	# Or keep full size. Let's use 1.9 to be safe.
+	shape.size = Vector3(1.9, 1.9, 1.9)
+	params.shape = shape
+	
+	# Structure pivots are at bottom (0,0,0). Center of BoxShape is at (0,1,0) relative to pivot.
+	var center_pos = pos + basis.y * 1.0
+	params.transform = Transform3D(basis, center_pos)
+	
+	params.collision_mask = 8 # Structures Layer
+	
+	var results = space_state.intersect_shape(params)
+	return results.size() == 0
 
 # --- Auto Shoot System ---
 @onready var auto_shoot_timer = $AutoShootTimer

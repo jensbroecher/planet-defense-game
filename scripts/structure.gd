@@ -5,6 +5,8 @@ extends StaticBody3D
 var current_health
 var is_built = false
 @onready var hp_label = $HPLabel
+var flash_scene = preload("res://scenes/effects/teleport_flash.tscn")
+var audio_started = false
 
 func _ready():
 	add_to_group("structures")
@@ -22,20 +24,43 @@ func start_teleport():
 	
 	# Tween the progress
 	var tween = create_tween()
+	var duration = 4.0 # Faster build for testing? Or typically 10.0
+	
+	# Add AudioPlayer3D dynamically
+	var sfx = AudioStreamPlayer3D.new()
+	sfx.stream = load("res://sounds/scifi-anime-whoosh-24-201456.mp3")
+	sfx.unit_size = 20.0
+	sfx.max_distance = 100.0
+	add_child(sfx)
+	
 	tween.tween_method(func(val): 
 		for mesh in meshes:
 			if mesh.material_override:
 				mesh.material_override.set_shader_parameter("progress", val)
-	, 0.0, 1.0, 10.0)
+		
+		# Play audio near end (whoosh)
+		if val > 0.7 and not audio_started:
+			audio_started = true
+			sfx.play()
+			
+	, 0.0, 1.0, duration)
 	
 	tween.tween_callback(func():
 		is_built = true
 		for mesh in meshes:
-			# Restore original or just remove override (assuming override was null initially or we handle it)
-			# If we want to restore specifically what was there, we might need to be more careful.
-			# But usually stripping the override reveals the mesh's own material.
 			mesh.material_override = null
+		
+		# Spawn Flash Particles
+		if flash_scene:
+			var flash = flash_scene.instantiate()
+			add_child(flash)
+			flash.emitting = true
+			
 		print(name, " construction complete!")
+		sfx.queue_free() # Clean up audio after it's done (actually wait for finish?) 
+		# Better to let it finish or keep it if reusable. 
+		# For oneshot whoosh, just queue_free after some time.
+		get_tree().create_timer(2.0).timeout.connect(sfx.queue_free)
 	)
 
 func take_damage(amount):

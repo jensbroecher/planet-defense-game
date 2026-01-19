@@ -1,0 +1,43 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="Curve" id="Curve_flash"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_flash"]
+curve = SubResource("Curve_flash")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_flash"]
+emission_shape = 2
+emission_sphere_radius = 2.0
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 5.0
+scale_min = 0.5
+scale_curve = SubResource("CurveTexture_flash")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flash"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(2, 2, 2, 1)
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_flash"]
+material = SubResource("StandardMaterial3D_flash")
+size = Vector2(0.5, 0.5)
+
+[node name="TeleportFlash" type="GPUParticles3D"]
+emitting = false
+amount = 50
+lifetime = 1.0
+one_shot = true
+explosiveness = 0.8
+process_material = SubResource("ParticleProcessMaterial_flash")
+draw_pass_1 = SubResource("QuadMesh_flash")

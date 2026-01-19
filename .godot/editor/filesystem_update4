@@ -1,11 +1,3 @@
-res://scripts/hq.gd
-res://scripts/enemy_spawner.gd
-res://scripts/game_manager.gd
-res://assets/materials/moon_material.tres
+res://scenes/effects/dust_trail.tscn
 res://scripts/player.gd
-res://scenes/structures/hq.tscn
-res://scenes/player.tscn
-res://scenes/structures/power_plant.tscn
 res://scripts/structure.gd
-res://assets/materials/starfield_sky.gdshader
-res://scripts/explosion.gd
