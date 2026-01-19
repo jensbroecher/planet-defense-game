@@ -19,8 +19,8 @@ func _process(delta):
 	fire_timer -= delta
 	
 	# Check Power
-	if not check_power():
-		return # No power, idle
+	if not check_power() or not is_built:
+		return # No power or not fully built, idle
 
 	if target == null or not is_instance_valid(target):
 		find_target()
@@ -48,6 +48,10 @@ func _process(delta):
 func check_power():
 	var sources = get_tree().get_nodes_in_group("power_sources")
 	for s in sources:
+		# Check if source is built (if it has that property)
+		if "is_built" in s and not s.is_built:
+			continue
+			
 		if global_position.distance_to(s.global_position) <= 50.0:
 			return true
 	return false

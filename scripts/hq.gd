@@ -17,6 +17,9 @@ func take_damage(amount):
 	GameManager.play_base_attack_alert()
 
 func _process(delta):
+	if not is_built:
+		return
+		
 	if player_in_range and is_instance_valid(player_in_range):
 		# Heal player
 		if player_in_range.current_health < player_in_range.max_health:
