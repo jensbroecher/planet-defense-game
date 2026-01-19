@@ -7,3 +7,5 @@ res://scenes/structures/hq.tscn
 res://scenes/player.tscn
 res://scenes/structures/power_plant.tscn
 res://scripts/structure.gd
+res://assets/materials/starfield_sky.gdshader
+res://scripts/explosion.gd

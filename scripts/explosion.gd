@@ -19,5 +19,12 @@ func _ready():
 		audio_player.play()
 	
 	# Start Particles
-	if particles_fire: particles_fire.emitting = true
-	if particles_smoke: particles_smoke.emitting = true
+	if particles_fire: 
+		particles_fire.one_shot = true
+		particles_fire.emitting = true
+		particles_fire.restart()
+		
+	if particles_smoke: 
+		particles_smoke.one_shot = true
+		particles_smoke.emitting = true
+		particles_smoke.restart()

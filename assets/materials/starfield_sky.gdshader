@@ -42,14 +42,14 @@ void sky() {
     // Z basis was (0.25, 0.866, -0.433)
     vec3 sun_dir = normalize(vec3(0.25, 0.866, -0.433));
     float sun_dot = dot(EYEDIR, sun_dir);
-    float sun_radius = 0.05; // Size of sun disk
+    float sun_radius = 0.01; // Size of sun disk
     float sun_intensity = 0.0;
     
     if (sun_dot > (1.0 - sun_radius)) {
         sun_intensity = 1.0;
     }
     // Sun Glow
-    float sun_glow = clamp((sun_dot - 0.9) * 10.0, 0.0, 1.0);
+    float sun_glow = clamp((sun_dot - 0.95) * 20.0, 0.0, 1.0);
 
     vec3 star_color = vec3(star_intensity); // No twinkle, just static intensity
     vec3 sky_bg = vec3(0.0, 0.0, 0.015); // Very dark blue

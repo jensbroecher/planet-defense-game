@@ -1,16 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://b8d5a7e6f3g2"]
+[gd_scene load_steps=8 format=3 uid="uid://b8d5a7e6f3g2"]
 
 [ext_resource type="PackedScene" uid="uid://c5xk8y9z4w21" path="res://scenes/player.tscn" id="1_player"]
-[ext_resource type="PackedScene" uid="uid://hq_structure_id" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
+[ext_resource type="PackedScene" uid="uid://bao4ir8aojfyu" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
 [ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2m1n9" path="res://scenes/ui.tscn" id="3_ui"]
-
 [ext_resource type="Shader" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
-
-[ext_resource type="Material" uid="uid://moon_material_unique_id" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
+[ext_resource type="Material" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
+[ext_resource type="PackedScene" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
-
 shader = ExtResource("4_sky_shader")
 
 [sub_resource type="Sky" id="Sky_y6k4m"]
@@ -61,3 +59,4 @@ script = ExtResource("2_spawner")
 
 [node name="UI" parent="CanvasLayer" instance=ExtResource("3_ui")]
 
+[node name="LensFlare" parent="CanvasLayer" instance=ExtResource("6_flare")]

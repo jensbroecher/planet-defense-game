@@ -70,6 +70,10 @@ func die():
 	# Hide Player Mesh
 	if visual_mesh:
 		visual_mesh.visible = false
+	
+	var tank_pivot = get_node_or_null("TankPivot")
+	if tank_pivot:
+		tank_pivot.visible = false
 		
 	# Spawn Explosion
 	if explosion_scene:
@@ -83,6 +87,9 @@ func die():
 	set_process(false)
 	
 func _unhandled_input(event):
+	if is_dead:
+		return
+		
 	if event is InputEventMouseMotion:
 		if Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 			return
