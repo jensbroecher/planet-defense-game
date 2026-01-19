@@ -7,6 +7,8 @@
 
 [ext_resource type="Shader" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
 
+[ext_resource type="Material" uid="uid://moon_material_unique_id" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
 
 shader = ExtResource("4_sky_shader")
@@ -24,6 +26,7 @@ glow_enabled = true
 radius = 40.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_k9m2n"]
+material = ExtResource("5_moon_mat")
 radius = 40.0
 height = 80.0
 

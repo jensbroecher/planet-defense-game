@@ -15,6 +15,10 @@ func take_damage(amount):
 	print(name, " took ", amount, " damage. Remaining: ", current_health)
 	update_hp_label()
 	
+	# Trigger Base Attack Alert (Global cooldown managed by GM)
+	# MOVED TO HQ ONLY
+	# GameManager.play_base_attack_alert()
+	
 	if current_health <= 0:
 		die()
 

@@ -23,6 +23,9 @@ var zoom_speed = 1.0
 var current_health
 @onready var hp_label = $HPLabel
 
+var is_dead = false
+var explosion_scene = preload("res://scenes/effects/explosion.tscn")
+
 func _ready():
 	add_to_group("player")
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -41,7 +44,12 @@ func _ready():
 	# print("SpringArm Hit Len: ", spring_arm.get_hit_length(), " | Actual: ", spring_arm.spring_length)
 
 func take_damage(amount):
+	if is_dead:
+		return
+		
 	current_health -= amount
+	current_health = max(0, current_health) # Clamp to 0
+	
 	print("Player took damage: ", amount, " Health: ", current_health)
 	update_hp_label()
 	
@@ -53,9 +61,26 @@ func update_hp_label():
 		hp_label.text = str(int(current_health))
 
 func die():
+	if is_dead:
+		return
+		
+	is_dead = true
 	print("Player Died!")
-	# Reload current scene for now
-	get_tree().reload_current_scene()
+	
+	# Hide Player Mesh
+	if visual_mesh:
+		visual_mesh.visible = false
+		
+	# Spawn Explosion
+	if explosion_scene:
+		var expl = explosion_scene.instantiate()
+		get_parent().add_child(expl)
+		expl.global_position = global_position
+	
+	GameManager.trigger_game_over()
+	# Disable processing/physics?
+	set_physics_process(false)
+	set_process(false)
 	
 func _unhandled_input(event):
 	if event is InputEventMouseMotion:
@@ -130,9 +155,23 @@ func _physics_process(delta):
 		var vert_vel = velocity.project(up_vector)
 		velocity = vert_vel + direction * move_speed
 		
-		# Rotate visual mesh to face movement direction (optional, for aesthetics)
-		# NOTE: This can conflict with the character body rotation if not careful.
-		# For now, let the CharacterBody rotation handle 'Up', and maybe we don't rotate to face forward yet or we do it simply.
+		# Rotate visual pivot to face movement direction
+		var tank_pivot = get_node_or_null("TankPivot")
+		if tank_pivot:
+			# Look at direction, using proper Up Vector
+			# Maintain scale of the Pivot (should be 1,1,1 usually, but good practice)
+			var current_scale = tank_pivot.scale
+			
+			# Calculate target transform looking at the target point
+			# Use tank_pivot.global_position so we look at the horizon at EQUAL HEIGHT, not at the ground (player feet).
+			var target_transform = tank_pivot.global_transform.looking_at(tank_pivot.global_position + direction, up_vector)
+			
+			# Interpolate global transform for smoothness
+			tank_pivot.global_transform = tank_pivot.global_transform.interpolate_with(target_transform, 10 * delta)
+			
+			# Restore Scale
+			tank_pivot.scale = current_scale
+
 	else:
 		# Decelerate tangential velocity only
 		var vert_vel = velocity.project(up_vector)
@@ -152,9 +191,10 @@ var structure_scenes = [
 	"res://scenes/structures/turret.tscn",
 	"res://scenes/structures/missile_turret.tscn",
 	"res://scenes/structures/laser_turret.tscn",
-	"res://scenes/structures/power_plant.tscn"
+	"res://scenes/structures/power_plant.tscn",
+	"res://scenes/structures/hq.tscn"
 ]
-var structure_costs = [50, 100, 75, 60]
+var structure_costs = [50, 100, 75, 60, 200]
 var current_structure_index = 0
 
 func _unhandled_input_build(event):
@@ -184,6 +224,9 @@ func _unhandled_input_build(event):
 			if event.keycode == KEY_4: 
 				current_structure_index = 3
 				update_ghost_visual()
+			if event.keycode == KEY_5: 
+				current_structure_index = 4
+				update_ghost_visual()
 		
 		if event.is_action_pressed("fire"):
 			try_build()
@@ -207,6 +250,7 @@ func update_ghost_visual():
 		if current_structure_index == 1: color = Color(0, 0, 1, 0.5) # Missile Blue
 		if current_structure_index == 2: color = Color(1, 1, 0, 0.5) # Laser Yellow
 		if current_structure_index == 3: color = Color(0, 1, 1, 0.5) # Power Cyan
+		if current_structure_index == 4: color = Color(1, 0.8, 0, 0.5) # HQ Gold
 		ghost_structure.mesh.material.albedo_color = color
 	
 	# Emit signal or update UI here if we had reference
@@ -216,9 +260,16 @@ func _input(event):
 	_unhandled_input_build(event)
 
 func try_build():
+	# Special Rule: HQ
+	if current_structure_index == 4:
+		if GameManager.hq_count > 0:
+			GameManager.notify("HQ Limit Reached! (Max 1)", 2.0)
+			return
+
 	var cost = structure_costs[current_structure_index]
 	if not GameManager.has_credits(cost):
-		print("Not enough credits! Need: ", cost)
+		GameManager.notify("Not enough credits! Need: " + str(cost), 2.0)
+		GameManager.play_voice("no_resources")
 		return
 
 	var result = get_raycast_collision()
@@ -244,6 +295,7 @@ func try_build():
 				structure.global_transform.basis = new_basis
 
 func _process(delta):
+	_handle_auto_shoot()
 	if is_build_mode and ghost_structure:
 		var result = get_raycast_collision()
 		if result:
@@ -269,3 +321,44 @@ func get_raycast_collision():
 	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
 	query.collision_mask = 1 # Only collide with planet (Layer 1)
 	return space_state.intersect_ray(query)
+
+# --- Auto Shoot System ---
+@onready var auto_shoot_timer = $AutoShootTimer
+var projectile_scene = preload("res://scenes/projectile_player.tscn")
+var auto_aim_range = 30.0
+
+func _handle_auto_shoot():
+	if not auto_shoot_timer.is_stopped():
+		return
+
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	if enemies.size() == 0:
+		return
+		
+	# Find nearest
+	var nearest = null
+	var min_dist = auto_aim_range
+	for body in enemies:
+		var d = global_position.distance_to(body.global_position)
+		if d < min_dist:
+			min_dist = d
+			nearest = body
+	
+	if nearest:
+		shoot_at(nearest)
+		auto_shoot_timer.start()
+
+func shoot_at(target_node):
+	if projectile_scene:
+		var proj = projectile_scene.instantiate()
+		get_parent().add_child(proj)
+		# Spawn at camera/player position, maybe slightly offset forward
+		proj.global_position = global_position + Vector3(0, 1.5, 0)
+		proj.look_at(target_node.global_position)
+		
+		# Set Damage (Laser Turret = 10)
+		if "damage" in proj:
+			proj.damage = 10
+
+func _on_auto_shoot_timer_timeout():
+	pass # Timer creates the delay, we check in process

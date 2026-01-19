@@ -60,8 +60,19 @@ func take_damage(amount):
 	if current_health <= 0:
 		die()
 
+@export var explosion_scene_path = "res://scenes/effects/enemy_explosion.tscn"
+
 func die():
 	GameManager.add_credits(10)
+	
+	# Spawn explosion
+	if explosion_scene_path:
+		var scene = load(explosion_scene_path)
+		if scene:
+			var expl = scene.instantiate()
+			get_parent().add_child(expl)
+			expl.global_position = global_position
+	
 	queue_free()
 
 func _physics_process(delta):

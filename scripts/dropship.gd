@@ -17,9 +17,23 @@ func _ready():
 	# Preload ground enemy
 	ground_enemy_scene = load("res://scenes/enemies/enemy_ground.tscn")
 
+@export var explosion_scene_path = "res://scenes/effects/enemy_explosion.tscn"
+
 func take_damage(amount):
-	queue_free() # One hit kill or add health? Let's say one hit for now or add health var.
+	queue_free() # One hit kill
+	die()
+
+func die():
 	GameManager.add_credits(20)
+	
+	if explosion_scene_path:
+		var scene = load(explosion_scene_path)
+		if scene:
+			var expl = scene.instantiate()
+			get_parent().add_child(expl)
+			expl.global_position = global_position
+			
+	queue_free()
 
 func _physics_process(delta):
 	# Always look at planet center for "belly down" orientation? 

@@ -4,6 +4,18 @@ extends "res://scripts/structure.gd"
 var healing_rate = 10.0 # HP per second
 var player_in_range = null
 
+func _ready():
+	super._ready()
+	GameManager.register_hq()
+
+func _exit_tree():
+	GameManager.unregister_hq()
+
+func take_damage(amount):
+	super.take_damage(amount)
+	# Only HQ triggers this alert now
+	GameManager.play_base_attack_alert()
+
 func _process(delta):
 	if player_in_range and is_instance_valid(player_in_range):
 		# Heal player
@@ -19,6 +31,9 @@ func _process(delta):
 func _on_healing_zone_body_entered(body):
 	if body.is_in_group("player"):
 		player_in_range = body
+		# Only play voice if actually damaged
+		if body.current_health < body.max_health:
+			GameManager.play_voice("repairing")
 		print("Player entered healing zone")
 
 func _on_healing_zone_body_exited(body):

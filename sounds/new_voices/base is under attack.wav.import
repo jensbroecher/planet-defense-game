@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://b7mljq02hu0x1"
+path="res://.godot/imported/base is under attack.wav-664b5846e0164284d8c53adb672a63df.sample"
+
+[deps]
+
+source_file="res://sounds/new_voices/base is under attack.wav"
+dest_files=["res://.godot/imported/base is under attack.wav-664b5846e0164284d8c53adb672a63df.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
