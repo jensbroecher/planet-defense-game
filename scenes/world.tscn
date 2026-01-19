@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://c5xk8y9z4w21" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://bao4ir8aojfyu" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
+[ext_resource type="PackedScene" uid="uid://missile_turret_id" path="res://scenes/structures/missile_turret.tscn" id="2_missile_turret"]
+[ext_resource type="PackedScene" path="res://scenes/structures/power_plant.tscn" id="3_power_plant"]
 [ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2m1n9" path="res://scenes/ui.tscn" id="3_ui"]
 [ext_resource type="Shader" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
@@ -48,6 +50,26 @@ mesh = SubResource("SphereMesh_k9m2n")
 
 [node name="HQ" parent="." instance=ExtResource("1_hq_struct")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0)
+
+[node name="TestTurret1" parent="." instance=ExtResource("2_missile_turret")]
+transform = Transform3D(0.92388, -0.382683, 0, 0.382683, 0.92388, 0, 0, 0, 1, 15, 37, 0)
+align_to_planet = true
+
+[node name="TestTurret2" parent="." instance=ExtResource("2_missile_turret")]
+transform = Transform3D(0.92388, 0.382683, 0, -0.382683, 0.92388, 0, 0, 0, 1, -15, 37, 0)
+align_to_planet = true
+
+[node name="TestTurret3" parent="." instance=ExtResource("2_missile_turret")]
+transform = Transform3D(1, 0, 0, 0, 0.92388, 0.382683, 0, -0.382683, 0.92388, 0, 37, 15)
+align_to_planet = true
+
+[node name="TestTurret4" parent="." instance=ExtResource("2_missile_turret")]
+transform = Transform3D(1, 0, 0, 0, 0.92388, -0.382683, 0, 0.382683, 0.92388, 0, 37, -15)
+align_to_planet = true
+
+[node name="TestPowerPlant" parent="." instance=ExtResource("3_power_plant")]
+transform = Transform3D(0.92388, -0.382683, 0, 0.382683, 0.92388, 0, 0, 0, 1, 10, 37.42, 10)
+align_to_planet = true
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 42, 0)

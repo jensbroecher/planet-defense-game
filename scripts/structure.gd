@@ -12,7 +12,34 @@ func _ready():
 	add_to_group("structures")
 	current_health = max_health
 	update_hp_label()
+	
+	if align_to_planet:
+		perform_alignment()
+		
 	start_teleport()
+
+@export var align_to_planet = false
+
+func perform_alignment():
+	# Align Up (Y) with planet normal (position normalized)
+	if global_position.is_zero_approx():
+		return
+		
+	var up = global_position.normalized()
+	# We want our Y to be 'up'
+	# We need a forward vector. Let's pick an arbitrary one, e.g. cross with global right, 
+	# unless up is parallel to right.
+	var right_guess = Vector3.RIGHT
+	if abs(up.dot(right_guess)) > 0.9:
+		right_guess = Vector3.BACK
+		
+	var forward = right_guess.cross(up).normalized()
+	var right = up.cross(forward).normalized()
+	
+	# Reconstruct Basis (columns: x, y, z)
+	# Godot Basis(x_axis, y_axis, z_axis)
+	global_transform.basis = Basis(right, up, forward)
+
 
 func start_teleport():
 	is_built = false

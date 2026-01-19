@@ -1,14 +1,18 @@
 extends CharacterBody3D
 
 @export var move_speed = 8.0
+@export var acceleration = 25.0
 @export var jump_velocity = 8.0
 @export var planet_center = Vector3.ZERO
 @export var mouse_sensitivity = 0.003
+@export var jump_buffer_time = 0.1
+@export var coyote_time = 0.15
 
 @onready var camera_rig = $CameraRig
 @onready var spring_arm = $CameraRig/SpringArm3D
 @onready var camera = $CameraRig/SpringArm3D/Camera3D
 @onready var visual_mesh = $MeshInstance3D
+@onready var engine_sound = $EngineSound
 
 # Vertical angle limits
 # Vertical angle limits
@@ -28,6 +32,9 @@ var explosion_scene = preload("res://scenes/effects/explosion.tscn")
 var dust_trail_scene = preload("res://scenes/effects/dust_trail.tscn")
 var dust_trail_node : GPUParticles3D = null
 var dust_grace_timer = 0.0
+
+var jump_buffer_timer = 0.0
+var coyote_timer = 0.0
 
 func _ready():
 	add_to_group("player")
@@ -155,9 +162,22 @@ func _physics_process(delta):
 	if not is_on_floor():
 		velocity += -up_vector * 20.0 * delta # 20.0 gravity for snappy feel
 
-	# 4. Handle Jump
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity += up_vector * jump_velocity
+	# 4. Handle Jump and Coyote Time
+	if is_on_floor():
+		coyote_timer = coyote_time
+	else:
+		if coyote_timer > 0:
+			coyote_timer -= delta
+			
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = jump_buffer_time
+		
+	if jump_buffer_timer > 0:
+		jump_buffer_timer -= delta
+		if coyote_timer > 0:
+			velocity += up_vector * jump_velocity
+			jump_buffer_timer = 0.0
+			coyote_timer = 0.0
 
 	# 5. Movement
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
@@ -174,10 +194,16 @@ func _physics_process(delta):
 	
 	var direction = (right_dir * input_dir.x + forward_dir * -input_dir.y).normalized()
 	
+
+	
+	# Preserve vertical velocity (gravity/jump)
+	var vert_vel = velocity.project(up_vector)
+	# Get current tangential velocity
+	var current_tan_vel = velocity - vert_vel
+	
+	var target_tan_vel = Vector3.ZERO
 	if direction:
-		# Preserve vertical velocity (gravity/jump)
-		var vert_vel = velocity.project(up_vector)
-		velocity = vert_vel + direction * move_speed
+		target_tan_vel = direction * move_speed
 		
 		# Rotate visual pivot to face movement direction
 		var tank_pivot = get_node_or_null("TankPivot")
@@ -196,12 +222,22 @@ func _physics_process(delta):
 			# Restore Scale
 			tank_pivot.scale = current_scale
 
-	else:
-		# Decelerate tangential velocity only
-		var vert_vel = velocity.project(up_vector)
-		var tan_vel = velocity - vert_vel
-		tan_vel = tan_vel.move_toward(Vector3.ZERO, move_speed)
-		velocity = vert_vel + tan_vel
+	# Apply Acceleration/Deceleration
+	# We move the current tangential velocity towards the target tangential velocity
+	var new_tan_vel = current_tan_vel.move_toward(target_tan_vel, acceleration * delta)
+	velocity = vert_vel + new_tan_vel
+
+	# Engine Sound Logic
+	if engine_sound:
+		var speed_ratio = new_tan_vel.length() / move_speed
+		# Pitch from 0.8 (idle) to 1.5 (full speed) - adjust to taste
+		var target_pitch = 0.8 + (0.7 * speed_ratio)
+		engine_sound.pitch_scale = lerp(engine_sound.pitch_scale, target_pitch, 5.0 * delta)
+		
+		# Ensure it's playing if we have a stream (user might add one later)
+		# If no stream is assigned, this does nothing harmful
+		if not engine_sound.playing and engine_sound.stream:
+			engine_sound.play()
 
 	move_and_slide()
 	

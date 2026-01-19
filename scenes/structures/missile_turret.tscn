@@ -1,16 +1,25 @@
-[gd_scene load_steps=6 format=3 uid="uid://missile_turret_id"]
+[gd_scene load_steps=8 format=3 uid="uid://bls5rj15yrtwd"]
 
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2q1x5" path="res://scenes/structures/structure.tscn" id="1_struct_m"]
-[ext_resource type="Script" path="res://scripts/turret.gd" id="2_turret_m"]
-[ext_resource type="PackedScene" uid="uid://missile_proj_id" path="res://scenes/missile.tscn" id="3_missile_proj"]
-[ext_resource type="AudioStream" path="res://sounds/laser-381976.mp3" id="4_sound"]
+[ext_resource type="Script" uid="uid://mirsex7cpfp7" path="res://scripts/turret.gd" id="2_turret_m"]
+[ext_resource type="PackedScene" path="res://scenes/missile.tscn" id="3_missile_proj"]
+[ext_resource type="AudioStream" uid="uid://bjal4bhi6ooh" path="res://sounds/laser-381976.mp3" id="4_sound"]
+[ext_resource type="PackedScene" uid="uid://dxnijbcx3gf75" path="res://models/turret+platform+3d+model.fbx" id="BaseModel"]
+[ext_resource type="PackedScene" uid="uid://00u88r4x86vl" path="res://models/futuristic+turret+3d+model.fbx" id="BodyModel"]
+[ext_resource type="PackedScene" uid="uid://dhittetbehu4h" path="res://models/futuristic+gun+3d+model.fbx" id="GunModel"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blue"]
-albedo_color = Color(0, 0.2, 0.8, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_flash"]
+emission_enabled = true
+emission = Color(1, 0.890196, 0.439216, 1)
+emission_energy_multiplier = 5.0
+transparency = 1
+albedo_color = Color(1, 1, 1, 0.5)
 
-[sub_resource type="BoxMesh" id="BoxMesh_head_blue"]
-material = SubResource("StandardMaterial3D_blue")
-size = Vector3(1.2, 0.8, 2.5)
+[sub_resource type="CylinderMesh" id="CylinderMesh_flash"]
+material = SubResource("StandardMaterial3D_flash")
+top_radius = 0.5
+bottom_radius = 0.1
+height = 1.0
 
 [node name="MissileTurret" instance=ExtResource("1_struct_m")]
 script = ExtResource("2_turret_m")
@@ -18,16 +27,43 @@ fire_rate = 3.0
 range = 80.0
 projectile_scene = ExtResource("3_missile_proj")
 
+[node name="BaseMesh" parent="." index="0" instance=ExtResource("BaseModel")]
+
+[node name="CollisionShape3D" parent="." index="1"]
+visible = false
+
 [node name="Head" type="Node3D" parent="." index="2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Head" index="0"]
-mesh = SubResource("BoxMesh_head_blue")
+[node name="BodyMesh" parent="Head" index="0" instance=ExtResource("BodyModel")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0.079563856, 0)
 
-[node name="Muzzle" type="Marker3D" parent="Head" index="1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.5)
+[node name="Gun" type="Node3D" parent="Head" index="1"]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0.633175, -0.3)
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." index="3"]
+[node name="GunMesh" parent="Head/Gun" index="0" instance=ExtResource("GunModel")]
+transform = Transform3D(-0.4, 0, -3.49691e-08, 0, 0.4, 0, 3.49691e-08, 0, -0.4, 0, 0, 0)
+
+[node name="Muzzle" type="Marker3D" parent="Head" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.5)
+
+[node name="MuzzleFlash" type="Node3D" parent="Head" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -3.0)
+visible = false
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Head/MuzzleFlash" index="0"]
+light_color = Color(1, 0.8, 0.2, 1)
+light_energy = 5.0
+omni_range = 10.0
+
+[node name="FlashMesh" type="MeshInstance3D" parent="Head/MuzzleFlash" index="1"]
+transform = Transform3D(3, 0, 0, 0, -1.31134e-07, 3, 0, -3, -1.31134e-07, 0, 0, 0)
+mesh = SubResource("CylinderMesh_flash")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." index="4"]
 stream = ExtResource("4_sound")
 unit_size = 20.0
 pitch_scale = 0.8
+
+[node name="MeshInstance3D" parent="." index="4"]
+visible = false

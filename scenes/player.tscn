@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ckpto0qirt32m" path="res://scripts/player.gd" id="1_m4n2b"]
 [ext_resource type="PackedScene" uid="uid://d2ovorlrvpdw5" path="res://models/futuristic+tank+3d+model.fbx" id="2_tank_model"]
+[ext_resource type="AudioStream" uid="uid://om48n6nmlh38" path="res://sounds/low-engine-hum-72529.mp3" id="3_engine_sound"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_j2k3l"]
 
@@ -57,5 +58,11 @@ font_size = 48
 [node name="AutoShootTimer" type="Timer" parent="."]
 wait_time = 0.5
 one_shot = true
+
+[node name="EngineSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("3_engine_sound")
+unit_size = 15.0
+max_db = 0.0
+autoplay = true
 
 [connection signal="timeout" from="AutoShootTimer" to="." method="_on_auto_shoot_timer_timeout"]

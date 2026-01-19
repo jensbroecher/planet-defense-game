@@ -1,3 +1,6 @@
 res://scenes/effects/dust_trail.tscn
 res://scripts/player.gd
 res://scripts/structure.gd
+res://scripts/turret.gd
+res://assets/materials/moon_material.tres
+res://scenes/structures/missile_turret.tscn

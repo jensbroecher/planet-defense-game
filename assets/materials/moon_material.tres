@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://cwit4ay3053k" path="res://textures/moon/Moon_001_SPEC.jpg" id="4_spec"]
 
 [resource]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+roughness = 0.8
 albedo_texture = ExtResource("1_color")
 roughness_texture = ExtResource("4_spec")
 normal_enabled = true
