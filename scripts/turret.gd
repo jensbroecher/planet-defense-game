@@ -1,8 +1,14 @@
 extends Structure
 
 @export var fire_rate = 1.0
-@export var range = 150.0
+@export var range = 250.0
 @export var projectile_scene : PackedScene
+@export var max_burst_time = 0.0 # 0 = Infinite
+@export var overheat_cooldown = 3.0
+
+var current_burst_time = 0.0
+var is_overheated = false
+var overheat_timer = 0.0
 
 @onready var head = $Head
 @onready var muzzle = $Head/Muzzle
@@ -40,9 +46,19 @@ func _process(delta):
 		find_target()
 	
 	if target:
+		# Overheat Logic
+		if is_overheated:
+			overheat_timer -= delta
+			if overheat_timer <= 0:
+				is_overheated = false
+				current_burst_time = 0.0
+				print(name, " cooled down!")
+			return # Cannot fire while overheating
+			
 		var dist = global_position.distance_to(target.global_position)
 		if dist > range or not check_line_of_sight(target):
 			target = null
+			current_burst_time = 0.0 # Reset burst if we lost target
 			return
 
 		# Aim
@@ -98,6 +114,23 @@ func _process(delta):
 		if fire_timer <= 0:
 			shoot()
 			fire_timer = fire_rate
+			
+			# Increment Burst
+			if max_burst_time > 0:
+				current_burst_time += fire_rate # Add time per shot? Or just use delta in process?
+				# Using fire_rate is better for discrete shots, but delta is better for continuous.
+				# Let's use delta in the main loop instead? 
+				# Actually, we are in process(delta), let's just add delta while valid target.
+				pass
+		
+		# Track Burst Time continuously while targeting/firing
+		if max_burst_time > 0:
+			current_burst_time += delta
+			if current_burst_time >= max_burst_time:
+				is_overheated = true
+				overheat_timer = overheat_cooldown
+				print(name, " OVERHEATED!")
+				# Optional: Play overheat sound
 
 func check_power():
 	var sources = get_tree().get_nodes_in_group("power_sources")
@@ -143,6 +176,10 @@ func shoot():
 		get_parent().add_child(proj)
 		proj.global_position = muzzle.global_position
 		proj.look_at(target.global_position)
+		
+		# Pass Target to Missile (Heat Seeking)
+		if "target_body" in proj:
+			proj.target_body = target
 		
 		# Recoil Animation
 		if gun and gun.has_node("GunMesh"):

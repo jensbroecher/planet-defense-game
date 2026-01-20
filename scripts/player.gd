@@ -232,15 +232,30 @@ func _physics_process(delta):
 	# Get current tangential velocity
 	var current_tan_vel = velocity - vert_vel
 	
+	# Get pivot reference once
+	var tank_pivot = get_node_or_null("TankPivot")
+	
+	# Hover Logic (Visual Only)
+	if tank_pivot:
+		# Target Height: -0.5 is "Landed", 0.0 is "Hovering/Driving"
+		var target_y = -0.5
+		if velocity.length() > 0.5:
+			target_y = 0.0
+			
+		# Smoothly interpolate Y
+		var current_y = tank_pivot.position.y
+		var new_y = lerp(current_y, target_y, 5.0 * delta)
+		
+		# FORCE Position X/Z to 0 to prevent drift, Update Y
+		tank_pivot.position = Vector3(0, new_y, 0)
+
 	var target_tan_vel = Vector3.ZERO
 	if direction:
 		target_tan_vel = direction * move_speed
 		
 		# Rotate visual pivot to face movement direction
-		var tank_pivot = get_node_or_null("TankPivot")
 		if tank_pivot:
-			# FIX DETACHMENT: Force local position to zero to prevent drift
-			tank_pivot.position = Vector3.ZERO
+			# NOTE: Position is handled above in Hover Logic
 			
 			# Calculate Local Direction for Rotation
 			# We want to look at (global_pos + direction).

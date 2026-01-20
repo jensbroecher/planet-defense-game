@@ -16,9 +16,11 @@ height = 1.5
 
 [node name="LaserTurret" instance=ExtResource("1_struct_l")]
 script = ExtResource("2_turret_l")
-fire_rate = 0.2
-range = 150.0
+fire_rate = 0.05
+range = 250.0
 projectile_scene = ExtResource("3_laser_proj")
+max_burst_time = 5.0
+overheat_cooldown = 3.0
 
 [node name="Head" type="Node3D" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 2.5, 0)
@@ -34,3 +36,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 stream = ExtResource("4_sound")
 unit_size = 20.0
 pitch_scale = 1.2
+max_polyphony = 20
+volume_db = -15.0

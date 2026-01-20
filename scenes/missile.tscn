@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://missile_proj_id"]
 
-[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_proj_m"]
+[ext_resource type="Script" path="res://scripts/missile.gd" id="1_proj_m"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_missile"]
 radius = 0.2

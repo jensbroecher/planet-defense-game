@@ -24,7 +24,7 @@ height = 1.0
 [node name="MissileTurret" instance=ExtResource("1_struct_m")]
 script = ExtResource("2_turret_m")
 fire_rate = 3.0
-range = 150.0
+range = 250.0
 projectile_scene = ExtResource("3_missile_proj")
 
 [node name="BaseMesh" parent="." index="0" instance=ExtResource("BaseModel")]

@@ -1,7 +1,8 @@
 extends "res://scripts/structure.gd"
 
 # Healing Logic
-var healing_rate = 10.0 # HP per second
+var healing_rate = 10.0 # HP per second (For Player)
+@export var self_heal_rate = 5.0 # HP per second (For Self)
 var player_in_range = null
 
 func _ready():
@@ -20,6 +21,13 @@ func _process(delta):
 	if not is_built:
 		return
 		
+	# Self Regeneration
+	if current_health < max_health:
+		current_health += self_heal_rate * delta
+		if current_health > max_health:
+			current_health = max_health
+		update_hp_label()
+
 	if player_in_range and is_instance_valid(player_in_range):
 		# Heal player
 		if player_in_range.current_health < player_in_range.max_health:
