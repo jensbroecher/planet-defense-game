@@ -1,8 +1,8 @@
 class_name Structure
 extends StaticBody3D
 
-@export var max_health = 50
-var current_health
+@export var max_health : float = 50.0
+var current_health : float = 50.0
 var is_built = false
 @onready var hp_label = $HPLabel
 var flash_scene = preload("res://scenes/effects/teleport_flash.tscn")

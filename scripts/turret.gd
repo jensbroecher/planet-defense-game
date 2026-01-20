@@ -17,10 +17,14 @@ var gun : Node3D = null
 var fire_timer = 0.0
 var target : Node3D = null
 
+var no_power_icon : Sprite3D
+
 func _ready():
 	super._ready() # specific to GdScript 2.0 / Godot 4
 	if not projectile_scene:
 		projectile_scene = load("res://scenes/projectile_player.tscn")
+	
+	setup_power_icon()
 	
 	# Try to find a child named "Gun" under Head, or check if Muzzle is child of something else
 	if head.has_node("Gun"):
@@ -34,12 +38,27 @@ func _ready():
 		# Search recursively or check standard paths
 		if head.has_node("Muzzle"):
 			muzzle = head.get_node("Muzzle")
+			
+func setup_power_icon():
+	no_power_icon = Sprite3D.new()
+	no_power_icon.texture = load("res://icons/lightning-bolt-circle.svg")
+	no_power_icon.pixel_size = 0.002
+	no_power_icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	no_power_icon.modulate = Color.YELLOW
+	no_power_icon.position = Vector3(0, 4.0, 0)
+	no_power_icon.visible = false
+	add_child(no_power_icon)
 
 func _process(delta):
 	fire_timer -= delta
 	
 	# Check Power
-	if not check_power() or not is_built:
+	var has_power = check_power()
+	
+	if no_power_icon:
+		no_power_icon.visible = is_built and not has_power
+		
+	if not has_power or not is_built:
 		return # No power or not fully built, idle
 
 	if target == null or not is_instance_valid(target):
@@ -139,7 +158,7 @@ func check_power():
 		if "is_built" in s and not s.is_built:
 			continue
 			
-		if global_position.distance_to(s.global_position) <= 50.0:
+		if global_position.distance_to(s.global_position) <= 30.0:
 			return true
 	return false
 
