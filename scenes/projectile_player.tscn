@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/projectile.gd" id="1_proj_p"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_j8k2l"]
-radius = 0.3
+radius = 0.1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h1g6f"]
 albedo_color = Color(0, 1, 0, 1)
@@ -13,13 +13,14 @@ emission_energy_multiplier = 2.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_m4p5o"]
 material = SubResource("StandardMaterial3D_h1g6f")
-radius = 0.2
-height = 0.4
+radius = 0.1
+height = 0.2
 
 [node name="ProjectilePlayer" type="Area3D"]
 collision_layer = 16
 collision_mask = 4
 script = ExtResource("1_proj_p")
+speed = 150.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_j8k2l")

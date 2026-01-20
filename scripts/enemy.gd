@@ -44,11 +44,26 @@ var current_health
 # Audio
 var audio_player : AudioStreamPlayer3D
 
+# Randomization
+var orbit_direction = 1.0 # 1 or -1
+var orbit_seed = 0.0
+
 func _ready():
 	add_to_group("enemies")
 	projectile_scene = load("res://scenes/projectile.tscn")
 	current_health = max_health
 	
+	# Randomize
+	orbit_direction = 1.0 if randf() > 0.5 else -1.0
+	orbit_seed = randf() * 100.0
+	
+	# Randomize initial attack delay so they don't all fire at once
+	attack_timer = randf_range(0.0, fire_rate * 2.0)
+	
+	# Optional: Slight variance in move speed or fire rate per unit
+	fire_rate = fire_rate * randf_range(0.8, 1.25)
+	move_speed = move_speed * randf_range(0.9, 1.1)
+
 	# Setup Audio
 	audio_player = AudioStreamPlayer3D.new()
 	add_child(audio_player)
@@ -76,34 +91,74 @@ func die():
 	queue_free()
 
 func _physics_process(delta):
-	match current_state:
-		State.APPROACHING:
-			var dist = global_position.distance_to(planet_center)
-			if dist > attack_range:
-				var dir = (planet_center - global_position).normalized()
-				velocity = dir * move_speed
-				move_and_slide()
-				look_at(planet_center) # Look at planet
-			else:
-				current_state = State.ATTACKING
-				
-		State.ATTACKING:
-			attack_timer -= delta
-			if attack_timer <= 0:
-				attack_timer = fire_rate
-				shoot_projectile()
+	# Find target if none
+	if target == null or not is_instance_valid(target):
+		find_target()
+	
+	# Always attack if cooldown ready (and has target)
+	attack_timer -= delta
+	if attack_timer <= 0:
+		attack_timer = fire_rate
+		shoot_projectile()
+		
+	# Movement Logic
+	var desired_velocity = Vector3.ZERO
+	
+	if target and is_instance_valid(target):
+		# Move towards target but maintain distance (attack_range)
+		var dist = global_position.distance_to(target.global_position)
+		var dir_to_target = (target.global_position - global_position).normalized()
+		
+		# Define desired velocity based on range
+		# Wobble the desired range slightly
+		var time = Time.get_ticks_msec() / 1000.0
+		var current_desired_range = attack_range + sin(time + orbit_seed) * 10.0
+		
+		if dist > current_desired_range:
+			# Too far, move closer
+			desired_velocity = dir_to_target * move_speed
+		else:
+			# In range, circle/strafe around target
+			# Vector from planet center to us (Up)
+			var up_vec = (global_position - planet_center).normalized()
 			
-			if target == null or not is_instance_valid(target):
-				find_target()
+			# Cross product of Direction To Target and UpVec gives a sideways vector
+			# This creates an orbit/circle path
+			# Multiply by randomized orbit_direction
+			var orbit_vec = dir_to_target.cross(up_vec).normalized() * orbit_direction
 			
-			if target:
-				# Check LOS periodically
-				if not has_line_of_sight(target):
-					target = null
-					current_state = State.APPROACHING
-					return
-
-				look_at(target.global_position)
+			# If dot product is negative (moving "left" vs "right"), we might want to maintain current orbital direction
+			# For now, just pick one direction (CW)
+			
+			# Mix in a little bit of "push away" if too close, or "pull in" if too far, 
+			# but mostly orbit.
+			desired_velocity = orbit_vec * (move_speed * 0.8) # Slightly slower when orbiting
+			
+			# Add explicit altitude correction (push out if inside planet, pull in if too high)
+			# (Assuming we rely on collisions mostly, but a soft force helps)
+	else:
+		# No target, just move towards planet center but stop at range
+		var dist = global_position.distance_to(planet_center)
+		if dist > attack_range:
+			desired_velocity = (planet_center - global_position).normalized() * move_speed
+		else:
+			desired_velocity = Vector3.ZERO
+	
+	# Apply Steering / Acceleration
+	var steering_speed = 2.0 # Adjust for turn rate
+	velocity = velocity.lerp(desired_velocity, delta * steering_speed)
+	
+	# Rotation: Look where we are going
+	if velocity.length_squared() > 1.0:
+		# smooth look_at
+		var target_look = global_position + velocity * 2.0
+		# We need to use valid up vector to avoid flipping when looking straight up/down relative to world Y
+		# But since we are in space/planet, maybe just standard look_at is mostly fine if we don't cross poles perfectly
+		# Better: just look_at. 
+		# If it jitters, we can lerp the basis, but let's try direct look_at fitst.
+		look_at(target_look)
+	
+	move_and_slide()
 
 func find_target():
 	# Find nearest structure or player
@@ -186,3 +241,8 @@ func shoot_projectile():
 		# Move projectile forward to clear enemy collision
 		# Assuming Enemy is roughly 1-2 units radius
 		proj.global_position -= proj.global_transform.basis.z * 3.0
+		
+		# Add Spread (reduce accuracy)
+		var spread_angle = deg_to_rad(5.0) # 5 degrees spread
+		proj.rotate_object_local(Vector3.UP, randf_range(-spread_angle, spread_angle))
+		proj.rotate_object_local(Vector3.RIGHT, randf_range(-spread_angle, spread_angle))

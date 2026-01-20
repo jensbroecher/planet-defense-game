@@ -17,7 +17,7 @@ height = 1.5
 [node name="LaserTurret" instance=ExtResource("1_struct_l")]
 script = ExtResource("2_turret_l")
 fire_rate = 0.2
-range = 50.0
+range = 150.0
 projectile_scene = ExtResource("3_laser_proj")
 
 [node name="Head" type="Node3D" parent="." index="2"]

@@ -2,17 +2,9 @@
 
 [ext_resource type="Script" path="res://scripts/enemy.gd" id="1_enemy_h"]
 
+[ext_resource type="PackedScene" uid="uid://c5xuypfqm6g31" path="res://models/battlecruiser+3d+model.fbx" id="2_battlecruiser"]
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_heavy"]
-size = Vector3(3, 3, 3)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_purple"]
-albedo_color = Color(0.5, 0, 0.5, 1)
-emission_enabled = true
-emission = Color(0.5, 0, 0.5, 1)
-emission_energy_multiplier = 3.0
-
-[sub_resource type="BoxMesh" id="BoxMesh_heavy"]
-material = SubResource("StandardMaterial3D_purple")
 size = Vector3(3, 3, 3)
 
 [node name="EnemyHeavy" type="CharacterBody3D"]
@@ -21,12 +13,12 @@ collision_mask = 3
 script = ExtResource("1_enemy_h")
 attack_type = 2
 move_speed = 5.0
+attack_range = 100.0
 max_health = 100
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_heavy")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("BoxMesh_heavy")
+[node name="battlecruiser+3d+model" parent="." instance=ExtResource("2_battlecruiser")]
+transform = Transform3D(-10, 0, -8.74228e-07, 0, 10, 0, 8.74228e-07, 0, -10, 0, 0, 0)

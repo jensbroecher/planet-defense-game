@@ -1,7 +1,7 @@
 extends Structure
 
 @export var fire_rate = 1.0
-@export var range = 50.0
+@export var range = 150.0
 @export var projectile_scene : PackedScene
 
 @onready var head = $Head
@@ -169,7 +169,7 @@ func shoot():
 			# Rotate randomly?
 			flash.rotation.z = randf_range(0, TAU)
 			var timer = get_tree().create_timer(0.05)
-			timer.timeout.connect(func(): flash.visible = false)
+			timer.timeout.connect(func(): if is_instance_valid(flash): flash.visible = false)
 		
 		# Play audio if exists
 		if has_node("AudioStreamPlayer3D"):

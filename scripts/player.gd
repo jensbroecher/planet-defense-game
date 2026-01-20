@@ -208,19 +208,21 @@ func _physics_process(delta):
 		# Rotate visual pivot to face movement direction
 		var tank_pivot = get_node_or_null("TankPivot")
 		if tank_pivot:
-			# Look at direction, using proper Up Vector
-			# Maintain scale of the Pivot (should be 1,1,1 usually, but good practice)
-			var current_scale = tank_pivot.scale
+			# FIX DETACHMENT: Force local position to zero to prevent drift
+			tank_pivot.position = Vector3.ZERO
 			
-			# Calculate target transform looking at the target point
-			# Use tank_pivot.global_position so we look at the horizon at EQUAL HEIGHT, not at the ground (player feet).
-			var target_transform = tank_pivot.global_transform.looking_at(tank_pivot.global_position + direction, up_vector)
+			# Calculate Local Direction for Rotation
+			# We want to look at (global_pos + direction).
+			var local_dir = to_local(global_position + direction)
 			
-			# Interpolate global transform for smoothness
-			tank_pivot.global_transform = tank_pivot.global_transform.interpolate_with(target_transform, 10 * delta)
+			# Calculate desired yaw (rotation around Y, Godot -Z is forward)
+			# atan2(-x, -z) aligns -Z to vector
+			var target_yaw = atan2(-local_dir.x, -local_dir.z)
 			
-			# Restore Scale
-			tank_pivot.scale = current_scale
+			# Interpolate angle locally
+			tank_pivot.rotation.y = lerp_angle(tank_pivot.rotation.y, target_yaw, 10 * delta)
+			
+			# Scale is preserved because we don't touch it (pivot.scale remains)
 
 	# Apply Acceleration/Deceleration
 	# We move the current tangential velocity towards the target tangential velocity
@@ -239,11 +241,23 @@ func _physics_process(delta):
 		if not engine_sound.playing and engine_sound.stream:
 			engine_sound.play()
 
+	# SAFETY NET: Prevent falling through planet
+	# Planet Radius is 40.0. If we get too deep, force push out.
+	var dist_to_center = global_position.distance_to(planet_center)
+	if dist_to_center < 39.5: # Allow small overlap for collision, but catch deep penetration
+		# Push out to surface
+		global_position = planet_center + (global_position - planet_center).normalized() * 40.0
+		# Kill downward velocity (slide along normal)
+		velocity = velocity.slide(up_vector)
+
 	move_and_slide()
 	
 	# Dust Trail Logic
 	if dust_trail_node:
-		if is_on_floor() and velocity.length() > 1.0:
+		# More permissive check: On floor OR very close to ground (e.g. 41.0 radius)
+		# This prevents dust cutting out on small bumps or single-frame airtime
+		var near_ground = dist_to_center < 41.5
+		if (is_on_floor() or near_ground) and velocity.length() > 1.0:
 			dust_grace_timer = 0.2
 			
 		if dust_grace_timer > 0:
@@ -405,7 +419,7 @@ func _process(delta):
 			
 			if ghost_structure.mesh and ghost_structure.mesh.material:
 				ghost_structure.mesh.material.albedo_color = target_color
-		else:
+		elif ghost_structure:
 			ghost_structure.visible = false
 
 func get_raycast_collision():
@@ -462,6 +476,16 @@ func _handle_auto_shoot():
 		auto_shoot_timer.start()
 
 func shoot_at(target_node):
+	# Check Line of Sight mainly to avoid shooting through planet
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(global_position + Vector3(0, 1.0, 0), target_node.global_position)
+	query.collision_mask = 1 # Planet Layer
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		# Hit Planet?
+		return # Blocked by planet
+
 	if projectile_scene:
 		var proj = projectile_scene.instantiate()
 		get_parent().add_child(proj)

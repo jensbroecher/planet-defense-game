@@ -2,7 +2,7 @@ extends Area3D
 
 @export var speed = 40.0
 @export var damage = 10
-@export var life_time = 5.0
+@export var life_time = 10.0
 
 func _ready():
 	# Ensure checking collisions with World (1), Player (2 - usually), Enemies (3), Structures (?)
