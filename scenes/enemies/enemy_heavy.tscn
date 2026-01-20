@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://enemy_heavy_id"]
 
 [ext_resource type="Script" path="res://scripts/enemy.gd" id="1_enemy_h"]
-
 [ext_resource type="PackedScene" uid="uid://c5xuypfqm6g31" path="res://models/battlecruiser+3d+model.fbx" id="2_battlecruiser"]
+[ext_resource type="PackedScene" uid="uid://8igxirsyqhg8" path="res://scenes/projectile_heavy.tscn" id="3_projectile"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_heavy"]
 size = Vector3(3, 3, 3)
@@ -14,6 +14,7 @@ script = ExtResource("1_enemy_h")
 attack_type = 2
 move_speed = 5.0
 attack_range = 100.0
+projectile_scene = ExtResource("3_projectile")
 max_health = 100
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -21,4 +22,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_heavy")
 
 [node name="battlecruiser+3d+model" parent="." instance=ExtResource("2_battlecruiser")]
-transform = Transform3D(-10, 0, -8.74228e-07, 0, 10, 0, 8.74228e-07, 0, -10, 0, 0, 0)
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)

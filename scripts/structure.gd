@@ -57,6 +57,7 @@ func start_teleport():
 	var sfx = AudioStreamPlayer3D.new()
 	sfx.stream = load("res://sounds/scifi-anime-whoosh-24-201456.mp3")
 	sfx.unit_size = 20.0
+	sfx.volume_db = -15.0
 	sfx.max_distance = 100.0
 	add_child(sfx)
 	

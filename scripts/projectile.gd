@@ -4,6 +4,8 @@ extends Area3D
 @export var damage = 10
 @export var life_time = 10.0
 
+var explosion_scene = preload("res://scenes/effects/projectile_explosion.tscn")
+
 func _ready():
 	# Ensure checking collisions with World (1), Player (2 - usually), Enemies (3), Structures (?)
 	monitoring = true
@@ -42,4 +44,8 @@ func _on_body_entered(body):
 		body.take_damage(damage)
 	
 	# Always destroy on impact with any body (Planet, Player, Structure)
+	var explosion = explosion_scene.instantiate()
+	get_tree().root.add_child(explosion)
+	explosion.global_position = global_position
+	
 	queue_free()

@@ -15,7 +15,10 @@ var initial_warning_given = false
 
 var enemy_scenes = [
 	"res://scenes/enemies/enemy.tscn",
+	"res://scenes/enemies/enemy.tscn",
 	"res://scenes/enemies/enemy_heavy.tscn",
+	"res://scenes/enemies/enemy_fast.tscn",
+	"res://scenes/enemies/enemy_fast.tscn",
 	"res://scenes/enemies/enemy_fast.tscn",
 	"res://scenes/enemies/dropship.tscn"
 ]
@@ -26,7 +29,11 @@ var spawn_timer = 0.0
 
 func _ready():
 	for path in enemy_scenes:
-		loaded_scenes.append(load(path))
+		var scene = load(path)
+		if scene:
+			loaded_scenes.append(scene)
+		else:
+			push_error("Failed to load enemy scene at path: " + path)
 	
 	# Delay warning until start_delay passes process
 

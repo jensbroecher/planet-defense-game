@@ -148,11 +148,14 @@ func check_line_of_sight(target_node):
 	var origin = muzzle.global_position
 	var end = target_node.global_position
 	var query = PhysicsRayQueryParameters3D.create(origin, end)
-	query.collision_mask = 1 # Check collision with Planet (Layer 1) only
+	query.collision_mask = 9 # Check collision with Planet (Layer 1) and Structures (Layer 4)
+	query.exclude = [self.get_rid()]
 	
 	var result = space_state.intersect_ray(query)
 	if result:
-		return false # Blocked by planet
+		if result.collider == target_node:
+			return true # Hit the target (unlikely if target is not Layer 1 or 4, but good for safety)
+		return false # Blocked by something else
 	return true
 
 func find_target():

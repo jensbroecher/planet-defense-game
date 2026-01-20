@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3 uid="uid://hill_object_id"]
+
+[ext_resource type="Script" path="res://scripts/hill.gd" id="1_hill"]
+[ext_resource type="Material" path="res://assets/materials/moon_material.tres" id="2_mat"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_hill"]
+radius = 8.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_hill"]
+material = ExtResource("2_mat")
+radius = 8.0
+height = 5.0
+is_hemisphere = true
+
+[node name="Hill" type="StaticBody3D"]
+collision_layer = 1
+script = ExtResource("1_hill")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("SphereShape3D_hill")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_hill")

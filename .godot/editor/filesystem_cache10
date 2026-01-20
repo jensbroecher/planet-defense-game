@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1768919976
+::res://::1768934915
 ::res://addons/::1768875278
 ::res://addons/terrainy/::1768875279
 plugin.cfg::TextFile::-1::1768875279::0::1::::<><><>0<>0<><>::
@@ -138,7 +138,7 @@ game_manager.gd::GDScript::2178123646086758612::1768775927::0::1::::<>Node<><>0<
 hq.gd::GDScript::861963702551252426::1768880645::0::1::::<>StaticBody3D<><>0<>0<><>::
 lens_flare_controller.gd::GDScript::282725839517515147::1768831213::0::1::::<>Control<><>0<>0<><>::
 missile.gd::GDScript::1433104626201715491::1768880557::0::1::::<>Area3D<><>0<>0<><>::
-player.gd::GDScript::5506875432242259386::1768879951::0::1::::<>CharacterBody3D<><>0<>0<><>::
+player.gd::GDScript::5506875432242259386::1768934217::0::1::::<>CharacterBody3D<><>0<>0<><>::
 power_plant.gd::GDScript::1837901425763845981::1768690897::0::1::::<>StaticBody3D<><>0<>0<><>::
 projectile.gd::GDScript::6269385180955201604::1768864300::0::1::::<>Area3D<><>0<>0<><>::
 structure.gd::GDScript::2174673905527390369::1768846064::0::1::::Structure<>StaticBody3D<><>0<>0<><>::
@@ -168,7 +168,7 @@ attack wave incoming.mp3::AudioStreamMP3::2054965290339807325::1768770766::17687
 base is under attack.mp3::AudioStreamMP3::2692697043070278552::1768770845::1768771159::1::::<><><>0<>0<>d87dcd3d0a78dbb67a8a61d7d674daaa<>res://.godot/imported/base is under attack.mp3-ab3a95dc3bb90decd1255412b9f6fe93.mp3str::
 not enough resources.mp3::AudioStreamMP3::4448624528520484282::1768770870::1768771159::1::::<><><>0<>0<>06e10260b5e4637839f4203743f823f4<>res://.godot/imported/not enough resources.mp3-bc21aa29d2fa454671f32bcbb1616494.mp3str::
 repairing.mp3::AudioStreamMP3::4954933493349705464::1768770783::1768771159::1::::<><><>0<>0<>127fef2a891729f4b478b6f733e8caba<>res://.godot/imported/repairing.mp3-f5cb7c45412085e28ed0a08f633c5f58.mp3str::
-::res://textures/::1768844937
+::res://textures/::1768919979
 ground-8901616_1920.png::CompressedTexture2D::6334153810193222781::1768844930::1768919979::1::::<><><>0<>0<>0799058c93516d019157e419c08c2dd0<>res://.godot/imported/ground-8901616_1920.png-857a58c1d8a3498724b7ac94e1816b0e.s3tc.ctex::
 ::res://textures/moon/::1768785479
 Moon_001_COLOR.jpg::CompressedTexture2D::3430906758562701566::1768783464::1768784410::1::::<><><>0<>0<>cf18dfa52ed9ae167193d9651bcde08c<>res://.godot/imported/Moon_001_COLOR.jpg-5401527ac9584c77efc0c35f9c06b348.s3tc.ctex::

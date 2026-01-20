@@ -9,6 +9,7 @@
 [ext_resource type="Shader" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
 [ext_resource type="Material" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
 [ext_resource type="PackedScene" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
+[ext_resource type="PackedScene" path="res://scenes/hill.tscn" id="7_hill"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
 shader = ExtResource("4_sky_shader")
@@ -41,6 +42,18 @@ environment = SubResource("Environment_q1w2e")
 
 [node name="Planet" type="StaticBody3D" parent="."]
 collision_layer = 1
+
+[node name="Hill1" parent="Planet" instance=ExtResource("7_hill")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 12, 0)
+align_to_planet = true
+
+[node name="Hill2" parent="Planet" instance=ExtResource("7_hill")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 26, 0)
+align_to_planet = true
+
+[node name="Hill3" parent="Planet" instance=ExtResource("7_hill")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 22)
+align_to_planet = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planet"]
 shape = SubResource("SphereShape3D_p3n8b")

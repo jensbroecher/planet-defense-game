@@ -28,3 +28,7 @@ func _ready():
 		particles_smoke.one_shot = true
 		particles_smoke.emitting = true
 		particles_smoke.restart()
+
+	# Cleanup after effect duration (5 seconds is plenty for particles/sound)
+	await get_tree().create_timer(5.0).timeout
+	queue_free()

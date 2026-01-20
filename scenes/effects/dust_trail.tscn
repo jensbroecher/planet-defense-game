@@ -56,7 +56,7 @@ material = SubResource("StandardMaterial3D_dust")
 [node name="DustTrail" type="GPUParticles3D"]
 emitting = false
 amount = 100
-lifetime = 1.5
+lifetime = 1.0
 local_coords = false
 process_material = SubResource("ParticleProcessMaterial_dust")
 draw_pass_1 = SubResource("QuadMesh_dust")

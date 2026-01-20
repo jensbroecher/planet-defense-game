@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 @export var move_speed = 8.0
 @export var acceleration = 25.0
-@export var jump_velocity = 8.0
+@export var jump_velocity = 15.0
 @export var planet_center = Vector3.ZERO
 @export var mouse_sensitivity = 0.003
 @export var jump_buffer_time = 0.1
@@ -29,8 +29,8 @@ var current_health
 
 var is_dead = false
 var explosion_scene = preload("res://scenes/effects/explosion.tscn")
-var dust_trail_scene = preload("res://scenes/effects/dust_trail.tscn")
-var dust_trail_node : GPUParticles3D = null
+var dust_trail_scene = preload("res://scenes/effects/dust_trail_cpu.tscn")
+var dust_trail_node : CPUParticles3D = null
 var dust_grace_timer = 0.0
 
 var jump_buffer_timer = 0.0
@@ -38,7 +38,7 @@ var coyote_timer = 0.0
 
 func _ready():
 	add_to_group("player")
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	# Set floor max angle to support walking on sphere (though gravity usually handles this)
 	floor_max_angle = deg_to_rad(60.0)
 	current_health = max_health
@@ -47,20 +47,22 @@ func _ready():
 	# FORCE SpringArm to only collide with Planet (Layer 1)
 	spring_arm.collision_mask = 1
 	
+	# Set Initial Camera Position (Steep angle, far away)
+	spring_arm.spring_length = 12.0
+	spring_arm.rotation_degrees.x = -45.0
+	
 	
 	# FORCE Hierarchy: Ensure visual nodes are NOT top_level (detached)
 	var tank_pivot = get_node_or_null("TankPivot")
 	if tank_pivot: tank_pivot.set_as_top_level(false)
 	camera_rig.set_as_top_level(false)
 	
-	# Manual Dust Trail Attachment (Decoupled from Player Hierarchy)
-	# This ensures it never gets messed up by Player/Pivot transforms
+	# Manual Dust Trail Attachment (Standard Hierarchy Approach)
 	if dust_trail_scene:
 		dust_trail_node = dust_trail_scene.instantiate()
-		# Add to PARENT (World), not self
-		get_parent().call_deferred("add_child", dust_trail_node)
-		# Initialize position immediately
-		dust_trail_node.global_position = global_position
+		add_child(dust_trail_node)
+		# Place it at ground level relative to player center
+		dust_trail_node.position = Vector3(0, -0.9, 0) # Adjust based on capsule height
 	
 	print("Player Ready at: ", global_position)
 	print("SpringArm Mask: ", spring_arm.collision_mask)
@@ -127,7 +129,7 @@ func die():
 		get_parent().add_child(expl)
 		# Offset slightly up so it's not buried
 		var up_vec = (global_position - planet_center).normalized()
-		expl.global_position = global_position + up_vec * 1.0
+		expl.global_position = global_position
 	
 	GameManager.trigger_game_over()
 	# Disable processing/physics?
@@ -209,6 +211,11 @@ func _physics_process(delta):
 			velocity += up_vector * jump_velocity
 			jump_buffer_timer = 0.0
 			coyote_timer = 0.0
+			
+	# Variable Jump Height: Cut velocity on release
+	if Input.is_action_just_released("jump") and velocity.dot(up_vector) > 0:
+		# Reduce vertical velocity by half to give control
+		velocity -= velocity.project(up_vector) * 0.5
 
 	# 5. Movement
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
@@ -237,10 +244,10 @@ func _physics_process(delta):
 	
 	# Hover Logic (Visual Only)
 	if tank_pivot:
-		# Target Height: -0.5 is "Landed", 0.0 is "Hovering/Driving"
+		# Target Height: -0.5 is "Landed", -0.25 is "Hovering/Driving" (Lowered from 0.0)
 		var target_y = -0.5
 		if velocity.length() > 0.5:
-			target_y = 0.0
+			target_y = -0.25
 			
 		# Smoothly interpolate Y
 		var current_y = tank_pivot.position.y
@@ -294,44 +301,52 @@ func _physics_process(delta):
 		# Penetration: Push out
 		global_position = planet_center + (global_position - planet_center).normalized() * 40.0
 		velocity = velocity.slide(up_vector)
-	elif dist_to_center > 45.0:
+	elif dist_to_center > 60.0:
 		# Ejection/Flight: Force down
 		# This prevents being stuck in space
 		global_position = planet_center + (global_position - planet_center).normalized() * 41.0
 		velocity = velocity.slide(up_vector)
 
+	# Lag Spike Detection
+	if delta > 0.1:
+		print("LAG SPIKE DETECTED: ", delta, "s")
+		
 	move_and_slide()
 	
 	# Dust Trail Logic
-	if dust_trail_node:
-		# More permissive check: On floor OR very close to ground (e.g. 41.0 radius)
-		# This prevents dust cutting out on small bumps or single-frame airtime
-		var near_ground = dist_to_center < 41.5
-		if (is_on_floor() or near_ground) and velocity.length() > 1.0:
-			dust_grace_timer = 0.2
-			
-			if not dust_trail_node.emitting:
-				dust_trail_node.emitting = true
-		else:
-			if dust_trail_node.emitting:
-				dust_trail_node.emitting = false
-				
-				dust_trail_node.emitting = false
-				
-		# HARDEN DUST TRAIL: Physics-Based Global Sync
-		# Completely ignore TankPivot to avoid hierarchy/transform glitches.
-		# Place trail behind the movement vector (velocity).
+	if is_instance_valid(dust_trail_node):
+		# Check if we should be emitting based on physics
+		# Check if we should be emitting based on physics
+		var space_state = get_world_3d().direct_space_state
+		# Raycast down 1.5 units (from center/feet) to check for ground (Planet or Hill)
+		var ray_query = PhysicsRayQueryParameters3D.create(global_position, global_position - up_direction * 1.5)
+		ray_query.collision_mask = 1 # Planet (1), we should also check Static Bodies?
+		# Actually hills are Layer 1? Let's check hills implementation.
+		# Hills are StaticBody3D with collision_layer = 1. So mask=1 is perfect.
+		var result = space_state.intersect_ray(ray_query)
 		
-		var trail_pos = global_position
-		if velocity.length() > 0.1:
-			# Place 2.0 units behind movement
-			var back_dir = -velocity.normalized()
-			trail_pos = global_position + back_dir * 2.0 + (up_vector * 0.5) 
-		else:
-			# If stopped, just stay at center (or keep last known? Center is fine)
-			trail_pos = global_position + (up_vector * 0.5)
+		var is_grounded = is_on_floor() or (result and result.size() > 0)
+		# Only emit if grounded AND not moving up significantly (e.g. jumping)
+		var is_moving_up = velocity.dot(up_vector) > 0.5
+		var should_emit = is_grounded and not is_moving_up and velocity.length() > 0.1
+		
+		# Update Grace Timer
+		if should_emit:
+			dust_grace_timer = 0.5 # Reset timer to full grace period (0.5s)
+		elif dust_grace_timer > 0:
+			dust_grace_timer -= delta
 			
-		dust_trail_node.global_position = trail_pos
+		# Apply Emission based on Timer
+		var final_emitting = dust_grace_timer > 0
+		
+		if dust_trail_node.emitting != final_emitting:
+			dust_trail_node.emitting = final_emitting
+			if not final_emitting:
+				# print("DEBUG: Dust STOPPED. Velo:%.1f Floor:%s Near:%s Dist:%.1f" % [velocity.length(), is_on_floor(), near_ground, dist_to_center])
+				pass
+			else:
+				# print("DEBUG: Dust STARTED.")
+				pass
 		
 	# --- Auto Shoot & Build Logic (Moved to Physics Process for Stability) ---
 	_handle_auto_shoot()
@@ -530,7 +545,7 @@ func check_placement_validity(pos: Vector3, basis: Basis) -> bool:
 # --- Auto Shoot System ---
 @onready var auto_shoot_timer = $AutoShootTimer
 var projectile_scene = preload("res://scenes/projectile_player.tscn")
-var auto_aim_range = 30.0
+var auto_aim_range = 120.0
 
 func _handle_auto_shoot():
 	if not auto_shoot_timer.is_stopped():

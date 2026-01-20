@@ -50,7 +50,7 @@ var orbit_seed = 0.0
 
 func _ready():
 	add_to_group("enemies")
-	projectile_scene = load("res://scenes/projectile.tscn")
+	# projectile_scene is now set via Inspector/Export
 	current_health = max_health
 	
 	# Randomize
@@ -114,11 +114,16 @@ func _physics_process(delta):
 		var time = Time.get_ticks_msec() / 1000.0
 		var current_desired_range = attack_range + sin(time + orbit_seed) * 10.0
 		
-		if dist > current_desired_range:
+		# Hysteresis / dead zone to prevent jitter
+		if dist > current_desired_range + 5.0:
 			# Too far, move closer
 			desired_velocity = dir_to_target * move_speed
+		elif dist < current_desired_range - 5.0:
+			# Too close, back up or orbit tightly (push away from target)
+			# Ideally we want to orbit but maybe backing up is better to maintain range
+			desired_velocity = -dir_to_target * (move_speed * 0.5)
 		else:
-			# In range, circle/strafe around target
+			# In ideal range (+/- 5 units), circle/strafe around target
 			# Vector from planet center to us (Up)
 			var up_vec = (global_position - planet_center).normalized()
 			
@@ -127,15 +132,7 @@ func _physics_process(delta):
 			# Multiply by randomized orbit_direction
 			var orbit_vec = dir_to_target.cross(up_vec).normalized() * orbit_direction
 			
-			# If dot product is negative (moving "left" vs "right"), we might want to maintain current orbital direction
-			# For now, just pick one direction (CW)
-			
-			# Mix in a little bit of "push away" if too close, or "pull in" if too far, 
-			# but mostly orbit.
 			desired_velocity = orbit_vec * (move_speed * 0.8) # Slightly slower when orbiting
-			
-			# Add explicit altitude correction (push out if inside planet, pull in if too high)
-			# (Assuming we rely on collisions mostly, but a soft force helps)
 	else:
 		# No target, just move towards planet center but stop at range
 		var dist = global_position.distance_to(planet_center)
