@@ -1,13 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://b8d5a7e6f3g2"]
+[gd_scene load_steps=16 format=3 uid="uid://b8d5a7e6f3g2"]
 
-[ext_resource type="PackedScene" uid="uid://c5xk8y9z4w21" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" uid="uid://bao4ir8aojfyu" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
-[ext_resource type="PackedScene" uid="uid://missile_turret_id" path="res://scenes/structures/missile_turret.tscn" id="2_missile_turret"]
-[ext_resource type="PackedScene" path="res://scenes/structures/power_plant.tscn" id="3_power_plant"]
-[ext_resource type="Script" path="res://scripts/enemy_spawner.gd" id="2_spawner"]
-[ext_resource type="PackedScene" uid="uid://c8j6y4v2m1n9" path="res://scenes/ui.tscn" id="3_ui"]
-[ext_resource type="Shader" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
-[ext_resource type="Material" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
+[ext_resource type="PackedScene" uid="uid://c5xk80a04w21" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://bls5rj15yrtwd" path="res://scenes/structures/missile_turret.tscn" id="2_missile_turret"]
+[ext_resource type="Script" uid="uid://cimtl08y7bi8v" path="res://scripts/enemy_spawner.gd" id="2_spawner"]
+[ext_resource type="PackedScene" uid="uid://mmv4d6thto8r" path="res://scenes/structures/power_plant.tscn" id="3_power_plant"]
+[ext_resource type="PackedScene" uid="uid://c8j6y4v2m1oa" path="res://scenes/ui.tscn" id="3_ui"]
+[ext_resource type="Shader" uid="uid://ct0ckfs5qmenk" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
+[ext_resource type="Material" uid="uid://c5yskpomtxw17" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
 [ext_resource type="PackedScene" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
 [ext_resource type="PackedScene" path="res://scenes/hill.tscn" id="7_hill"]
 
@@ -41,19 +41,18 @@ shadow_enabled = true
 environment = SubResource("Environment_q1w2e")
 
 [node name="Planet" type="StaticBody3D" parent="."]
-collision_layer = 1
 
 [node name="Hill1" parent="Planet" instance=ExtResource("7_hill")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 12, 0)
-align_to_planet = true
+transform = Transform3D(0.5153522, 0.85697854, 0, -0.85697854, 0.5153522, 0, 0, 0, 1, 31.881836, 17.471983, 0)
+hill_height = 6.0
 
 [node name="Hill2" parent="Planet" instance=ExtResource("7_hill")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 26, 0)
-align_to_planet = true
+transform = Transform3D(0.5574119, -0.8302361, 0, 0.8302361, 0.5574119, 0, 0, 0, 1, -29.679808, 18.67716, 0)
+hill_height = 10.0
 
 [node name="Hill3" parent="Planet" instance=ExtResource("7_hill")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 22)
-align_to_planet = true
+transform = Transform3D(1, 0, 0, 0, 0.86051095, -0.50943196, 0, 0.50943196, 0.86051095, 0, 26.758797, 22)
+seed_value = 10
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planet"]
 shape = SubResource("SphereShape3D_p3n8b")
@@ -63,6 +62,7 @@ mesh = SubResource("SphereMesh_k9m2n")
 
 [node name="HQ" parent="." instance=ExtResource("1_hq_struct")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0)
+self_heal_rate = 5.0
 
 [node name="TestTurret1" parent="." instance=ExtResource("2_missile_turret")]
 transform = Transform3D(0.92388, -0.382683, 0, 0.382683, 0.92388, 0, 0, 0, 1, 15, 37, 0)

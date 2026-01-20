@@ -8,3 +8,5 @@ res://scripts/enemy.gd
 res://scripts/enemy_spawner.gd
 res://scenes/structures/missile_turret.tscn
 res://scenes/effects/dust_trail_cpu.tscn
+res://scripts/hill.gd
+res://scenes/world.tscn
