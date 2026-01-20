@@ -3,6 +3,7 @@ extends Area3D
 @export var speed = 40.0
 @export var damage = 10
 @export var life_time = 10.0
+var shooter : Node = null
 
 var explosion_scene = preload("res://scenes/effects/projectile_explosion.tscn")
 
@@ -27,6 +28,9 @@ func _physics_process(delta):
 	var query = PhysicsRayQueryParameters3D.create(global_position, target_pos)
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
+	
+	if shooter:
+		query.exclude = [shooter.get_rid()]
 	
 	var result = space_state.intersect_ray(query)
 	if result:

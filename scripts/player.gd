@@ -582,13 +582,31 @@ func shoot_at(target_node):
 	if projectile_scene:
 		var proj = projectile_scene.instantiate()
 		get_parent().add_child(proj)
-		# Spawn at camera/player position, maybe slightly offset forward
-		proj.global_position = global_position + Vector3(0, 1.5, 0)
+		
+		# Spawn relative to player orientation and planet up
+		# We want it slightly in front and up from the center
+		var up = (global_position - planet_center).normalized()
+		var forward = -global_transform.basis.z
+		# Ensure forward is tangent to planet
+		forward = forward.slide(up).normalized()
+		
+		var spawn_pos = global_position + (up * 1.5) + (forward * 2.0)
+		proj.global_position = spawn_pos
 		proj.look_at(target_node.global_position)
+		
+		# Set Shooter to avoid self-collision
+		if "shooter" in proj:
+			proj.shooter = self
 		
 		# Set Damage (Laser Turret = 10)
 		if "damage" in proj:
 			proj.damage = 10
+			
+		# Play Sound
+		var shoot_sound = get_node_or_null("ShootSound")
+		if shoot_sound:
+			shoot_sound.pitch_scale = randf_range(0.9, 1.1)
+			shoot_sound.play()
 
 func _on_auto_shoot_timer_timeout():
 	pass # Timer creates the delay, we check in process
