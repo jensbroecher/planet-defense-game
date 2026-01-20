@@ -48,24 +48,32 @@ func _ready():
 	spring_arm.collision_mask = 1
 	
 	
+	# FORCE Hierarchy: Ensure visual nodes are NOT top_level (detached)
+	var tank_pivot = get_node_or_null("TankPivot")
+	if tank_pivot: tank_pivot.set_as_top_level(false)
+	camera_rig.set_as_top_level(false)
+	
+	# Manual Dust Trail Attachment (Decoupled from Player Hierarchy)
+	# This ensures it never gets messed up by Player/Pivot transforms
 	if dust_trail_scene:
 		dust_trail_node = dust_trail_scene.instantiate()
-		var tank_pivot = get_node_or_null("TankPivot")
-		if tank_pivot:
-			tank_pivot.add_child(dust_trail_node)
-			# Pivot is rotated 180 (scale -1) sometimes or model is reversed?
-			# TankModel is rotated 1.5, 1.5, -1.5? (Scale of 1.5 with Z flipped?)
-			# Let's adjust local position. If model faces -Z, behind is +Z.
-			dust_trail_node.position = Vector3(0, 0.5, 2.0) 
-		else:
-			add_child(dust_trail_node)
-			dust_trail_node.position = Vector3(0, 0.5, 2.0)
+		# Add to PARENT (World), not self
+		get_parent().call_deferred("add_child", dust_trail_node)
+		# Initialize position immediately
+		dust_trail_node.global_position = global_position
+	
+	print("Player Ready at: ", global_position)
+	print("SpringArm Mask: ", spring_arm.collision_mask)
 	
 	print("Player Ready at: ", global_position)
 	print("SpringArm Mask: ", spring_arm.collision_mask)
 	
 	# Debug Camera
 	# print("SpringArm Hit Len: ", spring_arm.get_hit_length(), " | Actual: ", spring_arm.spring_length)
+
+# ... (Existing methods) ...
+
+
 
 func take_damage(amount):
 	if is_dead:
@@ -91,19 +99,35 @@ func die():
 	is_dead = true
 	print("Player Died!")
 	
-	# Hide Player Mesh
+	# Cleanup Ghost
+	if ghost_structure:
+		ghost_structure.queue_free()
+		ghost_structure = null
+	
+	# Hide Player Mesh (Capsule)
 	if visual_mesh:
 		visual_mesh.visible = false
 	
+	# Hide Tank Model but keep Pivot/Trail visible if needed
 	var tank_pivot = get_node_or_null("TankPivot")
 	if tank_pivot:
-		tank_pivot.visible = false
+		# Iterate children to find model and lights
+		for child in tank_pivot.get_children():
+			if child == dust_trail_node:
+				continue # Keep trail visible (start fade out)
+			if child is Node3D: # Model, Lights
+				child.visible = false
+				
+	if dust_trail_node:
+		dust_trail_node.emitting = false
 		
 	# Spawn Explosion
 	if explosion_scene:
 		var expl = explosion_scene.instantiate()
 		get_parent().add_child(expl)
-		expl.global_position = global_position
+		# Offset slightly up so it's not buried
+		var up_vec = (global_position - planet_center).normalized()
+		expl.global_position = global_position + up_vec * 1.0
 	
 	GameManager.trigger_game_over()
 	# Disable processing/physics?
@@ -142,6 +166,13 @@ func _unhandled_input(event):
 		
 	if event.is_action_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func _exit_tree():
+	# Ensure external nodes are cleaned up
+	if dust_trail_node:
+		dust_trail_node.queue_free()
+	if ghost_structure:
+		ghost_structure.queue_free()
 
 func _physics_process(delta):
 	# 1. Calculate Up Vector (Normal from planet center)
@@ -241,13 +272,17 @@ func _physics_process(delta):
 		if not engine_sound.playing and engine_sound.stream:
 			engine_sound.play()
 
-	# SAFETY NET: Prevent falling through planet
-	# Planet Radius is 40.0. If we get too deep, force push out.
+	# SAFETY NET: Prevent falling through planet OR flying too high
+	# Planet Radius is 40.0. 
 	var dist_to_center = global_position.distance_to(planet_center)
-	if dist_to_center < 39.5: # Allow small overlap for collision, but catch deep penetration
-		# Push out to surface
+	if dist_to_center < 39.5: 
+		# Penetration: Push out
 		global_position = planet_center + (global_position - planet_center).normalized() * 40.0
-		# Kill downward velocity (slide along normal)
+		velocity = velocity.slide(up_vector)
+	elif dist_to_center > 45.0:
+		# Ejection/Flight: Force down
+		# This prevents being stuck in space
+		global_position = planet_center + (global_position - planet_center).normalized() * 41.0
 		velocity = velocity.slide(up_vector)
 
 	move_and_slide()
@@ -260,13 +295,59 @@ func _physics_process(delta):
 		if (is_on_floor() or near_ground) and velocity.length() > 1.0:
 			dust_grace_timer = 0.2
 			
-		if dust_grace_timer > 0:
-			dust_grace_timer -= delta
 			if not dust_trail_node.emitting:
 				dust_trail_node.emitting = true
 		else:
 			if dust_trail_node.emitting:
 				dust_trail_node.emitting = false
+				
+				dust_trail_node.emitting = false
+				
+		# HARDEN DUST TRAIL: Physics-Based Global Sync
+		# Completely ignore TankPivot to avoid hierarchy/transform glitches.
+		# Place trail behind the movement vector (velocity).
+		
+		var trail_pos = global_position
+		if velocity.length() > 0.1:
+			# Place 2.0 units behind movement
+			var back_dir = -velocity.normalized()
+			trail_pos = global_position + back_dir * 2.0 + (up_vector * 0.5) 
+		else:
+			# If stopped, just stay at center (or keep last known? Center is fine)
+			trail_pos = global_position + (up_vector * 0.5)
+			
+		dust_trail_node.global_position = trail_pos
+		
+	# --- Auto Shoot & Build Logic (Moved to Physics Process for Stability) ---
+	_handle_auto_shoot()
+	
+	if is_build_mode and ghost_structure:
+		var result = get_raycast_collision()
+		if result:
+			ghost_structure.visible = true
+			ghost_structure.global_position = result.position
+			# Align ghost
+			var normal = result.normal
+			var new_basis = Basis()
+			new_basis.y = normal
+			var ghost_cam_forward = -camera.global_transform.basis.z
+			new_basis.x = ghost_cam_forward.cross(normal).normalized()
+			new_basis.z = new_basis.x.cross(normal).normalized()
+			ghost_structure.global_transform.basis = new_basis
+			
+			# Update Ghost Color
+			var is_valid = check_placement_validity(ghost_structure.global_position, new_basis)
+			var target_color = Color(0, 1, 0, 0.5)
+			if current_structure_index == 1: target_color = Color(0, 0, 1, 0.5)
+			if current_structure_index == 2: target_color = Color(1, 1, 0, 0.5)
+			if current_structure_index == 3: target_color = Color(0, 1, 1, 0.5)
+			if current_structure_index == 4: target_color = Color(1, 0.8, 0, 0.5)
+			if not is_valid: target_color = Color(1, 0, 0, 0.5)
+			
+			if ghost_structure.mesh and ghost_structure.mesh.material:
+				ghost_structure.mesh.material.albedo_color = target_color
+		elif ghost_structure:
+			ghost_structure.visible = false
 
 # --- Building System ---
 var is_build_mode = false
@@ -361,6 +442,9 @@ func try_build():
 
 	var result = get_raycast_collision()
 	if result:
+		# DEBUG: What did we hit?
+		# print("Build Ray Hit: ", result.collider.name, " at ", result.position)
+		
 		var point = result.position
 		var normal = result.normal
 		
@@ -389,38 +473,7 @@ func try_build():
 				GameManager.add_credits(cost)
 				return
 
-func _process(delta):
-	_handle_auto_shoot()
-	if is_build_mode and ghost_structure:
-		var result = get_raycast_collision()
-		if result:
-			ghost_structure.visible = true
-			ghost_structure.global_position = result.position
-			# Align ghost
-			var normal = result.normal
-			var new_basis = Basis()
-			new_basis.y = normal
-			# Use camera forward for X alignment preference?
-			var cam_forward = -camera.global_transform.basis.z
-			new_basis.x = cam_forward.cross(normal).normalized()
-			new_basis.z = new_basis.x.cross(normal).normalized()
-			ghost_structure.global_transform.basis = new_basis
-			
-			# Update Ghost Color based on validity
-			var is_valid = check_placement_validity(ghost_structure.global_position, new_basis)
-			var target_color = Color(0, 1, 0, 0.5)
-			if current_structure_index == 1: target_color = Color(0, 0, 1, 0.5)
-			if current_structure_index == 2: target_color = Color(1, 1, 0, 0.5)
-			if current_structure_index == 3: target_color = Color(0, 1, 1, 0.5)
-			if current_structure_index == 4: target_color = Color(1, 0.8, 0, 0.5)
-			
-			if not is_valid:
-				target_color = Color(1, 0, 0, 0.5)
-			
-			if ghost_structure.mesh and ghost_structure.mesh.material:
-				ghost_structure.mesh.material.albedo_color = target_color
-		elif ghost_structure:
-			ghost_structure.visible = false
+
 
 func get_raycast_collision():
 	var space_state = get_world_3d().direct_space_state
@@ -429,7 +482,17 @@ func get_raycast_collision():
 	var ray_end = ray_origin + camera.project_ray_normal(mouse_pos) * 1000.0
 	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
 	query.collision_mask = 1 # Only collide with planet (Layer 1)
-	return space_state.intersect_ray(query)
+	query.exclude = [self.get_rid()] # Exclude player just in case
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		# DEBUG: Check if we are incorrectly hitting Player components
+		if result.collider == self:
+			print("WARNING: Raycast matched Player SELF!")
+	
+	return result
+
+
 
 func check_placement_validity(pos: Vector3, basis: Basis) -> bool:
 	var space_state = get_world_3d().direct_space_state
