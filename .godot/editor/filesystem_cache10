@@ -1,5 +1,5 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1768962083
+::res://::1768966771
 ::res://addons/::1768875278
 ::res://addons/terrainy/::1768875279
 plugin.cfg::TextFile::-1::1768875279::0::1::::<><><>0<>0<><>::
@@ -57,7 +57,8 @@ explosion.gdshader::Shader::2102116876053210023::1768765577::0::1::::<><><>0<>0<
 ::res://assets/textures/::1768831786
 ::res://icons/::1768949486
 lightning-bolt-circle.svg::CompressedTexture2D::7000186645980585566::1768949461::1768949486::1::::<><><>0<>0<>e459e39741cba692b42dab57f68bca60<>res://.godot/imported/lightning-bolt-circle.svg-e8b9b324e74a366a4ca03824e12e8967.ctex::
-::res://models/::1768962083
+::res://models/::1768968327
+asteroid.glb::PackedScene::1777340935020999095::1768966969::1768967061::1::::<><><>0<>0<>60e81cc34c0838f7989c2d59df246ef5<>res://.godot/imported/asteroid.glb-fcec2346e20bf88f62eddeade937cc24.scn::uid://dqaodhs3cqwcy::::res://models/asteroid_0.png
 battlecruiser+3d+model.fbx::PackedScene::6927245360098098658::1768861347::1768861426::1::::<><><>0<>0<>01538577dc1a4061bb728ae4abd068e7<>res://.godot/imported/battlecruiser+3d+model.fbx-165487db3aea053970e8cfc82c233659.scn::uid://nwqx76qpp8ue::::res://models/battlecruiser+3d+model_0.png<>uid://b4kafooi2t0is::::res://models/battlecruiser+3d+model_1.png
 battlecruiser+3d+model_0.png::CompressedTexture2D::958885552411593816::1768861349::1768861361::1::::<><><>0<>0<>4328987487ecf2dbf1b931280b251bf9<>res://.godot/imported/battlecruiser+3d+model_0.png-d443db668460f8c1802d5d3f58ca2c00.s3tc.ctex::
 battlecruiser+3d+model_1.png::CompressedTexture2D::4442550613060666702::1768861351::1768861361::1::::<><><>0<>0<>41719eccf1694615efc0a63a640fb940<>res://.godot/imported/battlecruiser+3d+model_1.png-1641eb85b3a61afb5cf527cc069db535.s3tc.ctex::
@@ -93,6 +94,9 @@ futuristic+turret+3d+model_0.png::CompressedTexture2D::7188955066891573168::1768
 futuristic+turret+3d+model_1.png::CompressedTexture2D::1993542807612915646::1768841113::1768841140::1::::<><><>0<>0<>105eb2f7873c2cbe0b22d536cdd34efe<>res://.godot/imported/futuristic+turret+3d+model_1.png-79379f12d9c2b52900b771f268ed5d00.s3tc.ctex::
 futuristic+turret+3d+model_2.png::CompressedTexture2D::3498950243420700924::1768841114::1768841115::1::::<><><>0<>0<>8fb470effed7d1d2bb2766f6565070a1<>res://.godot/imported/futuristic+turret+3d+model_2.png-0ca2271624fd844c268fc9fb64cfd655.ctex::
 futuristic+turret+3d+model_3.png::CompressedTexture2D::7359541861029086::1768841115::1768841116::1::::<><><>0<>0<>7b39bc8e4c6ba4f7fa0b7472372b3b70<>res://.godot/imported/futuristic+turret+3d+model_3.png-001f21a90d052c576f45914914fe8034.ctex::
+asteroid_0.png::CompressedTexture2D::8283139341313715924::1768967060::1768967061::1::::<><><>0<>0<>f97faf8908ec72d4838fcbf670de6b24<>res://.godot/imported/asteroid_0.png-fd87747671d9775ec3c661530bf72bb1.s3tc.ctex::
+planet4.glb::PackedScene::4735770014003217253::1768968327::1768968371::1::::<><><>0<>0<>90568664145ff7ced7b51178f3e2792b<>res://.godot/imported/planet4.glb-95b8602171438dc57b799ab79872516c.scn::uid://dv3hk23mc7wcl::::res://models/planet4_0.png
+planet4_0.png::CompressedTexture2D::8691474683414229703::1768968370::1768968371::1::::<><><>0<>0<>5a24ecec3fadb21f48086b615397b841<>res://.godot/imported/planet4_0.png-c4156e23e7b37fb719abc519e8c695c8.s3tc.ctex::
 stylized+space+fighter+3d+model.fbx::PackedScene::8179494974275216086::1768861886::1768861899::1::::<><><>0<>0<>85d2dde1c7f08619e282474c8c849f08<>res://.godot/imported/stylized+space+fighter+3d+model.fbx-704548686e3e4a5f9ec0d93b1cbdbf7f.scn::uid://dei7i1no2udwj::::res://models/stylized+space+fighter+3d+model_0.png<>uid://b8iaol8qatr7l::::res://models/stylized+space+fighter+3d+model_1.png
 stylized+space+fighter+3d+model_0.png::CompressedTexture2D::7458491064146205393::1768861888::1768861900::1::::<><><>0<>0<>530a5e2151d92a0a226ac093c6215166<>res://.godot/imported/stylized+space+fighter+3d+model_0.png-37ee98b54262203f05ceb7322961ed16.s3tc.ctex::
 stylized+space+fighter+3d+model_1.png::CompressedTexture2D::4719193176358448103::1768861890::1768861900::1::::<><><>0<>0<>7f1d757b78c175df98e9f9eba97124ad<>res://.godot/imported/stylized+space+fighter+3d+model_1.png-d8b450f6fb0554ff2d6d01769ae7709f.s3tc.ctex::
@@ -103,9 +107,9 @@ turret+platform+3d+model_0.png::CompressedTexture2D::5685732894319134641::176884
 turret+platform+3d+model_1.png::CompressedTexture2D::7100278999245083641::1768841127::1768841139::1::::<><><>0<>0<>69da720888cb9f6c7a62caacad982aed<>res://.godot/imported/turret+platform+3d+model_1.png-4d64a5415ec0b197ac08c48299efd01f.s3tc.ctex::
 turret+platform+3d+model_2.png::CompressedTexture2D::5780453911578757442::1768841128::1768841129::1::::<><><>0<>0<>d2e63ab41d0935e20710ed1fe8ce2051<>res://.godot/imported/turret+platform+3d+model_2.png-63dc5307c128b88b7cf61059045e168e.ctex::
 turret+platform+3d+model_3.png::CompressedTexture2D::2770837617431665106::1768841129::1768841130::1::::<><><>0<>0<>52697435cbb3129476fe84f587e36b20<>res://.godot/imported/turret+platform+3d+model_3.png-423a149dce44d9fd29a27e4b1cec2f61.ctex::
-::res://scenes/::1768962083
+::res://scenes/::1768967370
 hill.tscn::PackedScene::-1::1768942998::0::1::::<><><>0<>0<><>::
-lake.tscn::PackedScene::-1::1768962083::0::1::::<><><>0<>0<><>::
+lake.tscn::PackedScene::189800099028630665::1768963062::0::1::::<><><>0<>0<><>::res://scripts/lake.gd
 laser_bolt.tscn::PackedScene::-1::1768690081::0::1::::<><><>0<>0<><>::res://scripts/projectile.gd
 main_menu.tscn::PackedScene::-1::1768936367::0::1::::<><><>0<>0<><>::
 missile.tscn::PackedScene::-1::1768880564::0::1::::<><><>0<>0<><>::res://scripts/missile.gd
@@ -115,7 +119,7 @@ projectile_heavy.tscn::PackedScene::-1::1768941027::0::1::::<><><>0<>0<><>::
 projectile_player.tscn::PackedScene::269214785937035576::1768865243::0::1::::<><><>0<>0<><>::res://scripts/projectile.gd
 splash_screen.tscn::PackedScene::-1::1768936367::0::1::::<><><>0<>0<><>::
 ui.tscn::PackedScene::209105272056446004::1768832641::0::1::::<><><>0<>0<><>::res://scripts/ui.gd
-world.tscn::PackedScene::138549083974589807::1768962083::0::1::::<><><>0<>0<><>::uid://bao4ir8aojfyu::::res://scenes/structures/hq.tscn<>uid://c5xk80a04w21::::res://scenes/player.tscn<>uid://bls5rj15yrtwd::::res://scenes/structures/missile_turret.tscn<>uid://cimtl08y7bi8v::::res://scripts/enemy_spawner.gd<>uid://mmv4d6thto8r::::res://scenes/structures/power_plant.tscn<>uid://c8j6y4v2m1oa::::res://scenes/ui.tscn<>uid://ct0ckfs5qmenk::::res://assets/materials/starfield_sky.gdshader<>uid://c5yskpomtxw17::::res://assets/materials/moon_material.tres<>res://scenes/effects/lens_flare.tscn<>res://scenes/hill.tscn
+world.tscn::PackedScene::138549083974589807::1768968315::0::1::::<><><>0<>0<><>::uid://bao4ir8aojfyu::::res://scenes/structures/hq.tscn<>uid://c5xk80a04w21::::res://scenes/player.tscn<>uid://bls5rj15yrtwd::::res://scenes/structures/missile_turret.tscn<>uid://cimtl08y7bi8v::::res://scripts/enemy_spawner.gd<>uid://mmv4d6thto8r::::res://scenes/structures/power_plant.tscn<>uid://c8j6y4v2m1oa::::res://scenes/ui.tscn<>uid://ct0ckfs5qmenk::::res://assets/materials/starfield_sky.gdshader<>uid://c5yskpomtxw17::::res://assets/materials/moon_material.tres<>res://scenes/effects/lens_flare.tscn<>res://scenes/hill.tscn<>uid://cx68k1a2b3c4::::res://scenes/lake.tscn<>uid://m3pbgero6g7v::::res://textures/galaxy-11098_1920.jpg<>uid://0k7ssvnofntv::::res://models/asteroid.glb
 ::res://scenes/effects/::1768943869
 dust_trail.tscn::PackedScene::-1::1768940208::0::1::::<><><>0<>0<><>::
 dust_trail_cpu.tscn::PackedScene::-1::1768944424::0::1::::<><><>0<>0<><>::
@@ -139,7 +143,8 @@ missile_turret.tscn::PackedScene::3197509145834802179::1768942041::0::1::::<><><
 power_plant.tscn::PackedScene::868365707908822483::1768829517::0::1::::<><><>0<>0<><>::uid://c8j6y4v2q1x5::::res://scenes/structures/structure.tscn<>uid://1gj75705oqmv::::res://scripts/power_plant.gd<>uid://dtrow63qmy0xg::::res://models/futuristic+dome+3d+model.fbx
 structure.tscn::PackedScene::209105272056603556::1768758639::0::1::::<><><>0<>0<><>::res://scripts/structure.gd
 turret.tscn::PackedScene::266964317540525260::1768741668::0::1::::<><><>0<>0<><>::uid://c8j6y4v2q1x5::::res://scenes/structures/structure.tscn<>res://scripts/turret.gd<>res://sounds/laser-gun-105781.mp3
-::res://scripts/::1768962083
+::res://scripts/::1768968311
+background_sprite.gd::GDScript::8753528278826028098::1768967710::0::1::::<>Sprite3D<><>0<>0<><>::
 dropship.gd::GDScript::3934580908383333084::1768770259::0::1::::<>CharacterBody3D<><>0<>0<><>::
 enemy.gd::GDScript::2363086716806450690::1768942356::0::1::::<>CharacterBody3D<><>0<>0<><>::
 enemy_ground.gd::GDScript::1708322214419784378::1768866266::0::1::::<>CharacterBody3D<><>0<>0<><>::
@@ -148,18 +153,19 @@ explosion.gd::GDScript::8225278935168276909::1768936929::0::1::::<>Node3D<><>0<>
 game_manager.gd::GDScript::2178123646086758612::1768775927::0::1::::<>Node<><>0<>0<><>::
 hill.gd::GDScript::4089929420624833288::1768947303::0::1::::<>StaticBody3D<><>0<>1<><>::
 hq.gd::GDScript::861963702551252426::1768962083::0::1::::<>StaticBody3D<><>0<>0<><>::
-lake.gd::GDScript::-1::1768962083::0::1::::<>Node3D<><>0<>1<><>::
+lake.gd::GDScript::2889050471146791212::1768965713::0::1::::<>Node3D<><>0<>1<><>::
 lens_flare_controller.gd::GDScript::282725839517515147::1768831213::0::1::::<>Control<><>0<>0<><>::
 main_menu.gd::GDScript::3888713275757310783::1768936288::0::1::::<>Control<><>0<>0<><>::
 missile.gd::GDScript::1433104626201715491::1768880557::0::1::::<>Area3D<><>0<>0<><>::
 player.gd::GDScript::5506875432242259386::1768962083::0::1::::<>CharacterBody3D<><>0<>0<><>::
 power_plant.gd::GDScript::1837901425763845981::1768690897::0::1::::<>StaticBody3D<><>0<>0<><>::
 projectile.gd::GDScript::6269385180955201604::1768948143::0::1::::<>Area3D<><>0<>0<><>::
+rotator.gd::GDScript::8063125617640384693::1768968311::0::1::::<>Node3D<><>0<>0<><>::
 splash_screen.gd::GDScript::3498217711436909437::1768936284::0::1::::<>Control<><>0<>0<><>::
 structure.gd::GDScript::2174673905527390369::1768950187::0::1::::Structure<>StaticBody3D<><>0<>0<><>::
 turret.gd::GDScript::859845725937289098::1768949463::0::1::::<>Structure<><>0<>0<><>::
 ui.gd::GDScript::5281594299263880427::1768769654::0::1::::<>Control<><>0<>0<><>::
-::res://sounds/::1768962083
+::res://sounds/::1768962094
 laser-312360.mp3::AudioStreamMP3::8179329660369671216::1768741486::1768741552::1::::<><><>0<>0<>8fb24c7274d7fc6fd44d47f77ad45fba<>res://.godot/imported/laser-312360.mp3-f7251bb93beca460ea0754536cf7ceb0.mp3str::
 laser-381976.mp3::AudioStreamMP3::88789412209456563::1768741505::1768741552::1::::<><><>0<>0<>20700ca4a4ed0fa93e71fb91f92075ad<>res://.godot/imported/laser-381976.mp3-ea37d1e6a813dbdb041f6896597988f1.mp3str::
 laser-bounce-83892.mp3::AudioStreamMP3::5560325492190747620::1768962083::1768962094::1::::<><><>0<>0<>96cfe6a87151cbe2b2394029532d4710<>res://.godot/imported/laser-bounce-83892.mp3-16266800c20de91ca5b5904c924d9f9d.mp3str::
@@ -184,8 +190,14 @@ attack wave incoming.mp3::AudioStreamMP3::2054965290339807325::1768770766::17687
 base is under attack.mp3::AudioStreamMP3::2692697043070278552::1768770845::1768771159::1::::<><><>0<>0<>d87dcd3d0a78dbb67a8a61d7d674daaa<>res://.godot/imported/base is under attack.mp3-ab3a95dc3bb90decd1255412b9f6fe93.mp3str::
 not enough resources.mp3::AudioStreamMP3::4448624528520484282::1768770870::1768771159::1::::<><><>0<>0<>06e10260b5e4637839f4203743f823f4<>res://.godot/imported/not enough resources.mp3-bc21aa29d2fa454671f32bcbb1616494.mp3str::
 repairing.mp3::AudioStreamMP3::4954933493349705464::1768770783::1768771159::1::::<><><>0<>0<>127fef2a891729f4b478b6f733e8caba<>res://.godot/imported/repairing.mp3-f5cb7c45412085e28ed0a08f633c5f58.mp3str::
-::res://textures/::1768962083
+::res://textures/::1768968199
+galaxy-11098_1920.jpg::CompressedTexture2D::900981563567120101::1768967187::1768967346::1::::<><><>0<>0<>291e21eac61a03719adc2296abc97685<>res://.godot/imported/galaxy-11098_1920.jpg-e4caebfae9ad40b14089788e4b9429e1.s3tc.ctex::
+galaxy-11098_1920.png::CompressedTexture2D::6546999091725233364::1768968031::1768968199::1::::<><><>0<>0<>8a40a3eb1bb3e89f83309705c8952421<>res://.godot/imported/galaxy-11098_1920.png-a64594fe829ed059ccd9096d597bb363.s3tc.ctex::
 ground-8901616_1920.png::CompressedTexture2D::6334153810193222781::1768844930::1768919979::1::::<><><>0<>0<>0799058c93516d019157e419c08c2dd0<>res://.godot/imported/ground-8901616_1920.png-857a58c1d8a3498724b7ac94e1816b0e.s3tc.ctex::
+nebula2.png::CompressedTexture2D::5611800701055150429::1768967929::1768968199::1::::<><><>0<>0<>1b8b3ef09b85aae8b3c7f548dbaccebf<>res://.godot/imported/nebula2.png-c0c042854493cfeaa25be949d3115fc7.s3tc.ctex::
+nebula-6672283.jpg::CompressedTexture2D::3122375731720747354::1768967721::1768967750::1::::<><><>0<>0<>4f8cdde488d4c7528027bcafffdc60ea<>res://.godot/imported/nebula-6672283.jpg-f2f7b15e4145bce6cbf47039c527e54b.ctex::
+planet-914467_1920.jpg::CompressedTexture2D::4092247664952935933::1768967298::1768967599::1::::<><><>0<>0<>45a7251697b835fd3795bf6dc12a40e5<>res://.godot/imported/planet-914467_1920.jpg-ac3c4ce4c7bd8fb300d07f8c4543f3ba.s3tc.ctex::
+planet-914467_1920.png::CompressedTexture2D::5588457843847037557::1768967587::1768967761::1::::<><><>0<>0<>a59b716e7da9563dace18b220abe97d1<>res://.godot/imported/planet-914467_1920.png-b6151573b10cd5c072abc2c3b36eb43e.s3tc.ctex::
 rock-1238563_1280.jpg::CompressedTexture2D::5880755480781036101::1768946847::1768947117::1::::<><><>0<>0<>1178e7fcd6734a02172c699ad37f68f7<>res://.godot/imported/rock-1238563_1280.jpg-ce264b1832e26d0155adac58d2565572.s3tc.ctex::
 ::res://textures/moon/::1768785479
 Moon_001_COLOR.jpg::CompressedTexture2D::3430906758562701566::1768783464::1768784410::1::::<><><>0<>0<>cf18dfa52ed9ae167193d9651bcde08c<>res://.godot/imported/Moon_001_COLOR.jpg-5401527ac9584c77efc0c35f9c06b348.s3tc.ctex::

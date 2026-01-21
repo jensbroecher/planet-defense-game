@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://b8d5a7e6f3g2"]
+[gd_scene load_steps=23 format=3 uid="uid://b8d5a7e6f3g2"]
 
 [ext_resource type="PackedScene" uid="uid://bao4ir8aojfyu" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
 [ext_resource type="PackedScene" uid="uid://c5xk80a04w21" path="res://scenes/player.tscn" id="1_player"]
@@ -11,6 +11,12 @@
 [ext_resource type="PackedScene" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
 [ext_resource type="PackedScene" path="res://scenes/hill.tscn" id="7_hill"]
 [ext_resource type="PackedScene" uid="uid://cx68k1a2b3c4" path="res://scenes/lake.tscn" id="8_lake"]
+[ext_resource type="Texture2D" uid="uid://c0joebaac8l5e" path="res://textures/galaxy-11098_1920.png" id="9_galaxy"]
+[ext_resource type="Texture2D" uid="uid://clvdc4ltf4pc4" path="res://textures/planet-914467_1920.png" id="10_planet"]
+[ext_resource type="Script" uid="uid://dwyjlju4puybq" path="res://scripts/background_sprite.gd" id="11_bg_sprite"]
+[ext_resource type="Texture2D" uid="uid://cl7nsjr41f23r" path="res://textures/nebula2.png" id="11_nebula"]
+[ext_resource type="PackedScene" uid="uid://0k7ssvnofntv" path="res://models/asteroid.glb" id="12_q5onr"]
+[ext_resource type="Script" uid="uid://dm43rba131ecr" path="res://scripts/rotator.gd" id="13_rotator"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
 shader = ExtResource("4_sky_shader")
@@ -33,6 +39,27 @@ radius = 40.0
 height = 80.0
 
 [node name="World" type="Node3D"]
+
+[node name="GalaxySprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1379.5397, 50, 351.62646)
+pixel_size = 0.5
+double_sided = false
+texture = ExtResource("9_galaxy")
+script = ExtResource("11_bg_sprite")
+
+[node name="BackgroundPlanetSprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200, 80, -250)
+pixel_size = 0.5
+double_sided = false
+texture = ExtResource("10_planet")
+script = ExtResource("11_bg_sprite")
+
+[node name="NebulaSprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 150, 200)
+pixel_size = 0.02
+double_sided = false
+texture = ExtResource("11_nebula")
+script = ExtResource("11_bg_sprite")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
@@ -114,3 +141,17 @@ script = ExtResource("2_spawner")
 [node name="UI" parent="CanvasLayer" instance=ExtResource("3_ui")]
 
 [node name="LensFlare" parent="CanvasLayer" instance=ExtResource("6_flare")]
+
+[node name="Asteroid" parent="." instance=ExtResource("12_q5onr")]
+transform = Transform3D(8.103588, -5.8593407, 0, 5.8593407, 8.103588, 0, 0, 0, 10, 199.76724, 59.066338, -368.45367)
+script = ExtResource("13_rotator")
+
+[node name="Asteroid2" parent="." instance=ExtResource("12_q5onr")]
+transform = Transform3D(4, 3, 0, -3, 4, 0, 0, 0, 5, 219.77994, 45, -353.45367)
+script = ExtResource("13_rotator")
+rotation_speed = Vector3(-0.3, 0.1, 0.2)
+
+[node name="Asteroid3" parent="." instance=ExtResource("12_q5onr")]
+transform = Transform3D(12, 0, 0, 0, 10, -6.5, 0, 6.5, 10, 179.77994, 80, -388.45367)
+script = ExtResource("13_rotator")
+rotation_speed = Vector3(0.05, -0.2, 0.05)
