@@ -2,3 +2,4 @@ res://scripts/player.gd
 res://scenes/world.tscn
 res://scripts/hq.gd
 res://scripts/enemy_spawner.gd
+res://scripts/lake.gd

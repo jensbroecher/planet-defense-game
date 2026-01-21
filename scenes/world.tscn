@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://b8d5a7e6f3g2"]
+[gd_scene load_steps=17 format=3 uid="uid://b8d5a7e6f3g2"]
 
 [ext_resource type="PackedScene" uid="uid://bao4ir8aojfyu" path="res://scenes/structures/hq.tscn" id="1_hq_struct"]
 [ext_resource type="PackedScene" uid="uid://c5xk80a04w21" path="res://scenes/player.tscn" id="1_player"]
@@ -10,6 +10,7 @@
 [ext_resource type="Material" uid="uid://c5yskpomtxw17" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
 [ext_resource type="PackedScene" uid="uid://lensflare123" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
 [ext_resource type="PackedScene" path="res://scenes/hill.tscn" id="7_hill"]
+[ext_resource type="PackedScene" path="res://scenes/lake.tscn" id="8_lake"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
 shader = ExtResource("4_sky_shader")
@@ -70,7 +71,11 @@ seed_value = 564
 shape = SubResource("SphereShape3D_p3n8b")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Planet"]
+layers = 2
 mesh = SubResource("SphereMesh_k9m2n")
+
+[node name="Lake" parent="Planet" instance=ExtResource("8_lake")]
+transform = Transform3D(1, 0, 0, 0, 0.854556, 0.519358, 0, -0.519358, 0.854556, -14.061075, 32.84603, -16.161627)
 
 [node name="HQ" parent="." instance=ExtResource("1_hq_struct")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0)

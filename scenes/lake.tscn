@@ -1,0 +1,53 @@
+[gd_scene load_steps=5 format=3 uid="uid://cx68k1a2b3c4"]
+
+[ext_resource type="Script" path="res://scripts/lake.gd" id="1_script"]
+
+[sub_resource type="Gradient" id="Gradient_mask"]
+offsets = PackedFloat32Array(0.2, 0.5, 0.6)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_mask"]
+noise_type = 1
+frequency = 0.005
+fractal_type = 2
+fractal_octaves = 3
+fractal_gain = 0.5
+cellular_distance_function = 1
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mask"]
+width = 256
+height = 256
+color_ramp = SubResource("Gradient_mask")
+noise = SubResource("FastNoiseLite_mask")
+
+[node name="Lake" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(256, 256)
+render_target_update_mode = 4
+
+[node name="Mask" type="TextureRect" parent="SubViewport"]
+clip_children = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("NoiseTexture2D_mask")
+
+[node name="Water" type="TextureRect" parent="SubViewport/Mask"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Decal" type="Decal" parent="."]
+size = Vector3(20, 20, 20)
+cull_mask = 2
