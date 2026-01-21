@@ -36,6 +36,8 @@ var current_energy = 100.0
 var energy_drain_rate = 20.0
 @onready var energy_label = $EnergyLabel
 var is_in_safe_zone = false
+var boost_speed = 16.0
+var boost_drain_rate = 10.0
 
 var is_dead = false
 var explosion_scene = preload("res://scenes/effects/explosion.tscn")
@@ -268,7 +270,15 @@ func _physics_process(delta):
 
 	var target_tan_vel = Vector3.ZERO
 	if direction:
-		target_tan_vel = direction * move_speed
+		var current_speed = move_speed
+		# Boost Logic
+		if Input.is_key_pressed(KEY_SHIFT) and current_energy > 0:
+			current_speed = boost_speed
+			current_energy -= boost_drain_rate * delta
+			if current_energy < 0: current_energy = 0
+			update_energy_label()
+			
+		target_tan_vel = direction * current_speed
 		
 		# Rotate visual pivot to face movement direction
 		if tank_pivot:
