@@ -13,6 +13,10 @@ extends CharacterBody3D
 @onready var camera = $CameraRig/SpringArm3D/Camera3D
 @onready var visual_mesh = $MeshInstance3D
 @onready var engine_sound = $EngineSound
+@onready var beam_pivot = $TankPivot/BeamPivot
+@onready var beam_mesh = $TankPivot/BeamPivot/BeamMesh
+@onready var beam_particles = $TankPivot/BeamPivot/BeamParticles
+@onready var beam_sound = $BeamSound
 
 # Vertical angle limits
 # Vertical angle limits
@@ -26,11 +30,17 @@ var zoom_speed = 1.0
 @export var max_health = 100
 var current_health
 @onready var hp_label = $HPLabel
+# Energy
+@export var max_energy = 100.0
+var current_energy = 100.0
+var energy_drain_rate = 20.0
+@onready var energy_label = $EnergyLabel
+var is_in_safe_zone = false
 
 var is_dead = false
 var explosion_scene = preload("res://scenes/effects/explosion.tscn")
 var dust_trail_scene = preload("res://scenes/effects/dust_trail_cpu.tscn")
-var dust_trail_node : CPUParticles3D = null
+var dust_trail_node: CPUParticles3D = null
 var dust_grace_timer = 0.0
 
 var jump_buffer_timer = 0.0
@@ -42,7 +52,9 @@ func _ready():
 	# Set floor max angle to support walking on sphere (though gravity usually handles this)
 	floor_max_angle = deg_to_rad(60.0)
 	current_health = max_health
+	current_energy = max_energy
 	update_hp_label()
+	update_energy_label()
 	
 	# FORCE SpringArm to only collide with Planet (Layer 1)
 	spring_arm.collision_mask = 1
@@ -74,7 +86,6 @@ func _ready():
 	# print("SpringArm Hit Len: ", spring_arm.get_hit_length(), " | Actual: ", spring_arm.spring_length)
 
 # ... (Existing methods) ...
-
 
 
 func take_damage(amount):
@@ -187,7 +198,7 @@ func _physics_process(delta):
 		# Align the basis y vector to the up_vector
 		var current_transform = global_transform
 		current_transform.basis.y = up_vector
-		current_transform.basis.x = -current_transform.basis.z.cross(up_vector)
+		current_transform.basis.x = - current_transform.basis.z.cross(up_vector)
 		current_transform.basis = current_transform.basis.orthonormalized()
 		global_transform = global_transform.interpolate_with(current_transform, 10 * delta)
 
@@ -223,7 +234,7 @@ func _physics_process(delta):
 	# Get camera basis ideally aligned strictly to gravity for "forward" calculation?
 	# Actual camera forward in global space
 	var cam_basis = camera.global_transform.basis
-	var cam_forward = -cam_basis.z
+	var cam_forward = - cam_basis.z
 	var cam_right = cam_basis.x
 	
 	# Project onto surface tangent plane
@@ -233,7 +244,6 @@ func _physics_process(delta):
 	var direction = (right_dir * input_dir.x + forward_dir * -input_dir.y).normalized()
 	
 
-	
 	# Preserve vertical velocity (gravity/jump)
 	var vert_vel = velocity.project(up_vector)
 	# Get current tangential velocity
@@ -263,7 +273,6 @@ func _physics_process(delta):
 		# Rotate visual pivot to face movement direction
 		if tank_pivot:
 			# NOTE: Position is handled above in Hover Logic
-			
 			# Calculate Local Direction for Rotation
 			# We want to look at (global_pos + direction).
 			var local_dir = to_local(global_position + direction)
@@ -297,7 +306,7 @@ func _physics_process(delta):
 	# SAFETY NET: Prevent falling through planet OR flying too high
 	# Planet Radius is 40.0. 
 	var dist_to_center = global_position.distance_to(planet_center)
-	if dist_to_center < 39.5: 
+	if dist_to_center < 39.5:
 		# Penetration: Push out
 		global_position = planet_center + (global_position - planet_center).normalized() * 40.0
 		velocity = velocity.slide(up_vector)
@@ -348,8 +357,8 @@ func _physics_process(delta):
 				# print("DEBUG: Dust STARTED.")
 				pass
 		
-	# --- Auto Shoot & Build Logic (Moved to Physics Process for Stability) ---
-	_handle_auto_shoot()
+	# --- Continuous Beam Shoot ---
+	_handle_continuous_beam(delta)
 	
 	if is_build_mode and ghost_structure:
 		var result = get_raycast_collision()
@@ -360,7 +369,7 @@ func _physics_process(delta):
 			var normal = result.normal
 			var new_basis = Basis()
 			new_basis.y = normal
-			var ghost_cam_forward = -camera.global_transform.basis.z
+			var ghost_cam_forward = - camera.global_transform.basis.z
 			new_basis.x = ghost_cam_forward.cross(normal).normalized()
 			new_basis.z = new_basis.x.cross(normal).normalized()
 			ghost_structure.global_transform.basis = new_basis
@@ -379,11 +388,25 @@ func _physics_process(delta):
 		elif ghost_structure:
 			ghost_structure.visible = false
 
+
+func recharge(amount):
+	current_energy = min(max_energy, current_energy + amount)
+	update_energy_label()
+
+func update_energy_label():
+	if energy_label:
+		energy_label.text = str(int(current_energy)) + "%"
+		# Optional: Color code
+		if current_energy < 20:
+			energy_label.modulate = Color(1, 0, 0) # Red
+		else:
+			energy_label.modulate = Color(0, 1, 1) # Cyan
+			
 # --- Building System ---
 var is_build_mode = false
 var build_cooldown = 0.0
 const BUILD_RANGE = 20.0
-var ghost_structure : Node3D = null
+var ghost_structure: Node3D = null
 
 var structure_scenes = [
 	"res://scenes/structures/turret.tscn",
@@ -410,19 +433,19 @@ func _unhandled_input_build(event):
 
 	if is_build_mode:
 		if event is InputEventKey and event.pressed:
-			if event.keycode == KEY_1: 
+			if event.keycode == KEY_1:
 				current_structure_index = 0
 				update_ghost_visual()
-			if event.keycode == KEY_2: 
+			if event.keycode == KEY_2:
 				current_structure_index = 1
 				update_ghost_visual()
-			if event.keycode == KEY_3: 
+			if event.keycode == KEY_3:
 				current_structure_index = 2
 				update_ghost_visual()
-			if event.keycode == KEY_4: 
+			if event.keycode == KEY_4:
 				current_structure_index = 3
 				update_ghost_visual()
-			if event.keycode == KEY_5: 
+			if event.keycode == KEY_5:
 				current_structure_index = 4
 				update_ghost_visual()
 		
@@ -432,7 +455,7 @@ func _unhandled_input_build(event):
 func create_ghost():
 	var mesh = MeshInstance3D.new()
 	mesh.mesh = BoxMesh.new()
-	mesh.mesh.size = Vector3(2,2,2)
+	mesh.mesh.size = Vector3(2, 2, 2)
 	# Create a transparent material
 	var mat = StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -474,7 +497,6 @@ func try_build():
 	if result:
 		# DEBUG: What did we hit?
 		# print("Build Ray Hit: ", result.collider.name, " at ", result.position)
-		
 		var point = result.position
 		var normal = result.normal
 		
@@ -491,7 +513,7 @@ func try_build():
 				# Look at logic for aligning Y to normal
 				var new_basis = Basis()
 				new_basis.y = normal
-				new_basis.x = -structure.global_transform.basis.z.cross(normal).normalized()
+				new_basis.x = - structure.global_transform.basis.z.cross(normal).normalized()
 				new_basis.z = new_basis.x.cross(normal).normalized()
 				structure.global_transform.basis = new_basis
 
@@ -502,7 +524,6 @@ func try_build():
 				# Restore credits
 				GameManager.add_credits(cost)
 				return
-
 
 
 func get_raycast_collision():
@@ -523,7 +544,6 @@ func get_raycast_collision():
 	return result
 
 
-
 func check_placement_validity(pos: Vector3, basis: Basis) -> bool:
 	var space_state = get_world_3d().direct_space_state
 	var params = PhysicsShapeQueryParameters3D.new()
@@ -542,71 +562,76 @@ func check_placement_validity(pos: Vector3, basis: Basis) -> bool:
 	var results = space_state.intersect_shape(params)
 	return results.size() == 0
 
-# --- Auto Shoot System ---
-@onready var auto_shoot_timer = $AutoShootTimer
-var projectile_scene = preload("res://scenes/projectile_player.tscn")
-var auto_aim_range = 120.0
+# --- Continuous Beam System ---
+var beam_range = 120.0
+var beam_dps = 30.0
 
-func _handle_auto_shoot():
-	if not auto_shoot_timer.is_stopped():
+func _handle_continuous_beam(delta):
+	if is_in_safe_zone:
+		# Safety Override
+		if beam_pivot: beam_pivot.visible = false
+		if beam_sound and beam_sound.playing: beam_sound.stop()
+		if beam_particles: beam_particles.emitting = false
 		return
 
 	var enemies = get_tree().get_nodes_in_group("enemies")
-	if enemies.size() == 0:
-		return
-		
-	# Find nearest
+	
+	# Find nearest valid target
 	var nearest = null
-	var min_dist = auto_aim_range
+	var min_dist = beam_range
+	
 	for body in enemies:
+		if not is_instance_valid(body): continue
+		if body.has_method("is_dead") and body.is_dead(): continue # Skip dead
+		
+		# Check distance
 		var d = global_position.distance_to(body.global_position)
 		if d < min_dist:
-			min_dist = d
-			nearest = body
-	
-	if nearest:
-		shoot_at(nearest)
-		auto_shoot_timer.start()
-
-func shoot_at(target_node):
-	# Check Line of Sight mainly to avoid shooting through planet
-	var space_state = get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(global_position + Vector3(0, 1.0, 0), target_node.global_position)
-	query.collision_mask = 1 # Planet Layer
-	var result = space_state.intersect_ray(query)
-	
-	if result:
-		# Hit Planet?
-		return # Blocked by planet
-
-	if projectile_scene:
-		var proj = projectile_scene.instantiate()
-		get_parent().add_child(proj)
-		
-		# Spawn relative to player orientation and planet up
-		# We want it slightly in front and up from the center
-		var up = (global_position - planet_center).normalized()
-		var forward = -global_transform.basis.z
-		# Ensure forward is tangent to planet
-		forward = forward.slide(up).normalized()
-		
-		var spawn_pos = global_position + (up * 1.5) + (forward * 2.0)
-		proj.global_position = spawn_pos
-		proj.look_at(target_node.global_position)
-		
-		# Set Shooter to avoid self-collision
-		if "shooter" in proj:
-			proj.shooter = self
-		
-		# Set Damage (Laser Turret = 10)
-		if "damage" in proj:
-			proj.damage = 10
+			# Check Line of Sight (Planet)
+			var space_state = get_world_3d().direct_space_state
+			var query = PhysicsRayQueryParameters3D.create(global_position + Vector3(0, 1.0, 0), body.global_position)
+			query.collision_mask = 1 # Planet Layer
+			var result = space_state.intersect_ray(query)
 			
-		# Play Sound
-		var shoot_sound = get_node_or_null("ShootSound")
-		if shoot_sound:
-			shoot_sound.pitch_scale = randf_range(0.9, 1.1)
-			shoot_sound.play()
-
-func _on_auto_shoot_timer_timeout():
-	pass # Timer creates the delay, we check in process
+			if not result:
+				min_dist = d
+				nearest = body
+	
+	if nearest and current_energy > 0:
+		# Target Found & Energy Available
+		# Drain Energy
+		current_energy -= energy_drain_rate * delta
+		if current_energy < 0: current_energy = 0
+		update_energy_label()
+		
+		if beam_pivot:
+			beam_pivot.visible = true
+			beam_pivot.look_at(nearest.global_position)
+			
+			var dist = global_position.distance_to(nearest.global_position)
+			
+			# Update Beam Visuals (Scale Y because of rotation, Pos Z)
+			if beam_mesh:
+				beam_mesh.scale.y = dist
+				beam_mesh.position.z = - dist / 2.0
+			
+			if beam_particles:
+				beam_particles.emitting = true
+				beam_particles.position.z = - dist
+				
+			# Apply Damage
+			if nearest.has_method("take_damage"):
+				nearest.take_damage(beam_dps * delta)
+				
+		# Sound
+		if beam_sound and not beam_sound.playing:
+			beam_sound.play()
+			
+	else:
+		# No Target
+		if beam_pivot:
+			beam_pivot.visible = false
+		if beam_sound and beam_sound.playing:
+			beam_sound.stop()
+		if beam_particles:
+			beam_particles.emitting = false

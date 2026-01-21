@@ -1,13 +1,4 @@
-res://scripts/structure.gd
 res://scripts/player.gd
-res://scripts/explosion.gd
-res://scripts/projectile.gd
-res://scripts/turret.gd
-res://scenes/effects/dust_trail.tscn
-res://scripts/enemy.gd
-res://scripts/enemy_spawner.gd
-res://scenes/structures/missile_turret.tscn
-res://scenes/effects/dust_trail_cpu.tscn
-res://scripts/hill.gd
 res://scenes/world.tscn
-res://assets/materials/moon_material.tres
+res://scripts/hq.gd
+res://scripts/enemy_spawner.gd

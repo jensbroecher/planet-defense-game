@@ -3,6 +3,7 @@ extends "res://scripts/structure.gd"
 # Healing Logic
 var healing_rate = 10.0 # HP per second (For Player)
 @export var self_heal_rate = 5.0 # HP per second (For Self)
+var energy_recharge_rate = 30.0
 var player_in_range = null
 
 func _ready():
@@ -39,15 +40,28 @@ func _process(delta):
 			if player_in_range.has_method("update_hp_label"):
 				player_in_range.update_hp_label()
 
+		# Recharge Energy
+		if player_in_range.has_method("recharge"):
+			player_in_range.recharge(energy_recharge_rate * delta)
+
 func _on_healing_zone_body_entered(body):
 	if body.is_in_group("player"):
 		player_in_range = body
 		# Only play voice if actually damaged
 		if body.current_health < body.max_health:
 			GameManager.play_voice("repairing")
+		
+		# Set Safe Zone
+		if body.get("is_in_safe_zone") != null:
+			body.is_in_safe_zone = true
+			
 		print("Player entered healing zone")
 
 func _on_healing_zone_body_exited(body):
 	if body == player_in_range:
+		# Unset Safe Zone
+		if body.get("is_in_safe_zone") != null:
+			body.is_in_safe_zone = false
+			
 		player_in_range = null
 		print("Player left healing zone")

@@ -24,10 +24,6 @@ GameManager="*res://scripts/game_manager.gd"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 
-[rendering]
-
-environment/defaults/default_clear_color=Color(0, 0, 0, 1)
-
 [input]
 
 move_forward={
@@ -72,3 +68,7 @@ fire={
 3d_physics/layer_2="Player"
 3d_physics/layer_3="Enemy"
 3d_physics/layer_4="Structure"
+
+[rendering]
+
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2m1oa" path="res://scenes/ui.tscn" id="3_ui"]
 [ext_resource type="Shader" uid="uid://ct0ckfs5qmenk" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
 [ext_resource type="Material" uid="uid://c5yskpomtxw17" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
-[ext_resource type="PackedScene" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
+[ext_resource type="PackedScene" uid="uid://lensflare123" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
 [ext_resource type="PackedScene" path="res://scenes/hill.tscn" id="7_hill"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
@@ -53,6 +53,18 @@ hill_height = 10.0
 [node name="Hill3" parent="Planet" instance=ExtResource("7_hill")]
 transform = Transform3D(1, 0, 0, 0, 0.86051095, -0.50943196, 0, 0.50943196, 0.86051095, 0, 26.758797, 22)
 seed_value = 10
+
+[node name="Hill4" parent="Planet" instance=ExtResource("7_hill")]
+transform = Transform3D(1, 0, 0, 0, 0.86051095, -0.50943196, 0, 0.50943196, 0.86051095, -4.284149, 27.678257, 19.063831)
+seed_value = 10
+
+[node name="Hill5" parent="Planet" instance=ExtResource("7_hill")]
+transform = Transform3D(1, 0, 0, 0, 0.85011333, -0.52659976, 0, 0.52659976, 0.85011333, -8.908144, 24.735695, 20.39864)
+seed_value = 564
+
+[node name="Hill6" parent="Planet" instance=ExtResource("7_hill")]
+transform = Transform3D(0.64465404, -0.52575064, -0.5549843, -0.08701436, 0.6707873, -0.7365273, 0.7595062, 0.5230969, 0.38667804, -16.955238, 24.735695, 19.119488)
+seed_value = 564
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Planet"]
 shape = SubResource("SphereShape3D_p3n8b")

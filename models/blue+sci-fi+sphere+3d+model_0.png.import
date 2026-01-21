@@ -2,14 +2,11 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bq5mnqa21acys"
+uid="uid://b35sh1mf5vksv"
 path.s3tc="res://.godot/imported/blue+sci-fi+sphere+3d+model_0.png-610b0bd41a987f772a58b88f71247f84.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
-}
-generator_parameters={
-"md5": "556f9370e20dd21a65650dab4986803f"
 }
 
 [deps]

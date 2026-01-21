@@ -4,10 +4,59 @@
 [ext_resource type="PackedScene" uid="uid://d2ovorlrvpdw5" path="res://models/futuristic+tank+3d+model.fbx" id="2_tank_model"]
 [ext_resource type="AudioStream" uid="uid://om48n6nmlh38" path="res://sounds/low-engine-hum-72529.mp3" id="3_engine_sound"]
 [ext_resource type="AudioStream" uid="uid://bnqnec2mnqiko" path="res://sounds/laser-gun-105781.mp3" id="4_shoot_sound"]
+[ext_resource type="AudioStream" uid="uid://clhp0pimla86s" path="res://sounds/laser-bounce-83892.mp3" id="5_beam_sound"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_j2k3l"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_n5o3p"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_beam"]
+transparency = 1
+albedo_color = Color(0, 1, 1, 0.8)
+emission_enabled = true
+emission = Color(0, 1, 1, 1)
+emission_energy_multiplier = 10.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_beam"]
+material = SubResource("StandardMaterial3D_beam")
+top_radius = 0.05
+bottom_radius = 0.05
+height = 1.0
+
+[sub_resource type="Gradient" id="Gradient_spark"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_spark"]
+gradient = SubResource("Gradient_spark")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_spark"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = SubResource("GradientTexture2D_spark")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_spark"]
+emission_shape = 1
+emission_sphere_radius = 0.5
+direction = Vector3(0, 0, 1)
+spread = 180.0
+initial_velocity_min = 2.0
+initial_velocity_max = 8.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.5
+scale_max = 1.0
+color = Color(1, 1, 1, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_spark"]
+size = Vector2(0.2, 0.2)
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -57,6 +106,13 @@ billboard = 1
 text = "100"
 font_size = 48
 
+[node name="EnergyLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+billboard = 1
+modulate = Color(0, 1, 1, 1)
+text = "100%"
+font_size = 32
+
 [node name="AutoShootTimer" type="Timer" parent="."]
 wait_time = 0.5
 one_shot = true
@@ -73,3 +129,23 @@ max_db = 0.0
 autoplay = true
 
 [connection signal="timeout" from="AutoShootTimer" to="." method="_on_auto_shoot_timer_timeout"]
+
+[node name="BeamPivot" type="Node3D" parent="TankPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+visible = false
+
+[node name="BeamMesh" type="MeshInstance3D" parent="TankPivot/BeamPivot"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.5)
+mesh = SubResource("CylinderMesh_beam")
+
+[node name="BeamParticles" type="GPUParticles3D" parent="TankPivot/BeamPivot"]
+visible = true
+material_override = SubResource("StandardMaterial3D_spark")
+amount = 50
+process_material = SubResource("ParticleProcessMaterial_spark")
+draw_pass_1 = SubResource("QuadMesh_spark")
+
+[node name="BeamSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("5_beam_sound")
+unit_size = 20.0
+max_db = -5.0
