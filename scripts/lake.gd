@@ -4,8 +4,8 @@ extends Node3D
 @export var frames_folder: String = "res://textures/water_128px_frames"
 @export var fps: float = 30.0
 
-@export var tiling: int = 3
-@export var water_tint: Color = Color(0.35, 0.45, 0.55, 1.0) # Default slight blue-grey, can be overridden to brown in inspector
+@export var tiling: int = 6
+@export var water_tint: Color = Color(0.15, 0.2, 0.3, 1.0) # Darker water tint
 @export var noise_seed: int = 1337
 @export var noise_frequency: float = 0.003
 @export var noise_fractal_octaves: int = 3
@@ -22,7 +22,34 @@ func _ready() -> void:
 func generate_frames() -> void:
 	_frames.clear()
 	
-	# 1. Create Noise Mask
+	var dir = DirAccess.open(frames_folder)
+	if not dir:
+		print("Lake: Could not open directory: ", frames_folder)
+		return
+
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	var files = []
+	while file_name != "":
+		if !dir.current_is_dir() and file_name.ends_with(".png") and !file_name.ends_with(".import"):
+			files.append(file_name)
+		file_name = dir.get_next()
+	files.sort()
+	
+	if files.size() == 0:
+		return
+
+	# Load first frame to determine dimensions
+	var first_tex = load(frames_folder + "/" + files[0])
+	if not first_tex: 
+		return
+		
+	var source_w = first_tex.get_width()
+	var source_h = first_tex.get_height()
+	var final_w = source_w * tiling
+	var final_h = source_h * tiling
+	
+	# 1. Prepare Mask Image (O(TotalPixels)) - DONE ONCE
 	var noise = FastNoiseLite.new()
 	noise.seed = noise_seed
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
@@ -30,91 +57,70 @@ func generate_frames() -> void:
 	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
 	noise.fractal_octaves = noise_fractal_octaves
 	
-	var mask_image = noise.get_image(256 * tiling, 256 * tiling)
+	var noise_img = noise.get_image(final_w, final_h) # Returns L8
 	
-	# Apply threshold manually to create hard edges or soft edges for the mask
-	# Since get_image returns grayscale noise
+	# Create the Alpha Mask used for blit_rect_mask
+	# Mask needs to be RGBA8 so the Alpha channel exists and works.
+	# We want to bake the falloff into this mask's Alpha.
 	
-	var dir = DirAccess.open(frames_folder)
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		var files = []
-		while file_name != "":
-			if !dir.current_is_dir() and file_name.ends_with(".png") and !file_name.ends_with(".import"):
-				files.append(file_name)
-			file_name = dir.get_next()
+	var final_mask = Image.create(final_w, final_h, false, Image.FORMAT_RGBA8)
+	var center = Vector2(final_w/2.0, final_h/2.0)
+	var max_dist = final_w / 2.0
+	
+	# Loop pixels once to generate valid mask
+	for y in range(final_h):
+		for x in range(final_w):
+			var n = noise_img.get_pixel(x,y).r
+			var dist = center.distance_to(Vector2(x, y))
+			# Relaxed falloff to fill more of the lake
+			var radial_falloff = 1.0 - smoothstep(max_dist * 0.7, max_dist * 0.95, dist)
+			
+			if n * radial_falloff > 0.35: # Threshold
+				final_mask.set_pixel(x, y, Color(1, 1, 1, 1)) # White = keep
+			else:
+				final_mask.set_pixel(x, y, Color(0, 0, 0, 0)) # Black = discard
+
+	# 2. Process Frames (Fast Loop using C++ blit)
+	for f in files:
+		var stream_tex = load(frames_folder + "/" + f)
+		if not stream_tex: continue
 		
-		files.sort()
+		var img = stream_tex.get_image()
+		if not img: continue
 		
-		for f in files:
-			var stream_tex = load(frames_folder + "/" + f)
-			if stream_tex:
-				var img = stream_tex.get_image() # Original 128x128 image
-				if img:
-					# Convert to RGBA8 to match the target image format for blitting
-					if img.get_format() != Image.FORMAT_RGBA8:
-						img.convert(Image.FORMAT_RGBA8)
-						
-					# Create larger image for tiling
-					var tiled_width = img.get_width() * tiling
-					var tiled_height = img.get_height() * tiling
-					var final_img = Image.create(tiled_width, tiled_height, false, Image.FORMAT_RGBA8)
-					
-					# Tile the image
-					for x in range(tiling):
-						for y in range(tiling):
-							final_img.blit_rect(img, Rect2(0, 0, img.get_width(), img.get_height()), Vector2(x * img.get_width(), y * img.get_height()))
-					
-					# Resize mask to match if needed (though we generated it large enough)
-					if mask_image.get_width() != tiled_width:
-						mask_image.resize(tiled_width, tiled_height)
-						
-					# Apply Mask (Alpha)
-					# Iterate pixels - expensive but done only once at startup
-					for y in range(tiled_height):
-						for x in range(tiled_width):
-							var mask_val = mask_image.get_pixel(x, y).r
-							# Create a hole in the middle (island) or just a lake shape
-							# Let's assume white = water, black = land
-							# Simple threshold
-							var alpha = 0.0
-							# Center bias to fade edges
-							var center = Vector2(tiled_width/2.0, tiled_height/2.0)
-							var dist = center.distance_to(Vector2(x, y))
-							var max_dist = tiled_width / 2.0
-							var radial_falloff = 1.0 - smoothstep(max_dist * 0.5, max_dist, dist)
-							
-							if mask_val * radial_falloff > 0.4: # Threshold
-								alpha = 1.0
-							else:
-								alpha = 0.0
-								
-							var col = final_img.get_pixel(x,y)
-							# Apply tint
-							col = col * water_tint
-							
-							# Apply alpha mask
-							col.a = alpha
-							
-							# IMPORTANT: Multi-multiply RGB by alpha (or just clear it)
-							# because Decal Emission might ignore alpha and just read RGB.
-							# If alpha is 0, we want RGB to be black so it doesn't emit.
-							col.r *= alpha
-							col.g *= alpha
-							col.b *= alpha
-							
-							final_img.set_pixel(x, y, col)
-					
-					var tex = ImageTexture.create_from_image(final_img)
-					_frames.append(tex)
-	else:
-		print("Lake: Could not open directory: ", frames_folder)
+		if img.get_format() != Image.FORMAT_RGBA8:
+			img.convert(Image.FORMAT_RGBA8)
+			
+		# Tint the small source image (O(SmallPixels)) - Very fast
+		if water_tint != Color(1,1,1,1):
+			for y in range(source_h):
+				for x in range(source_w):
+					var c = img.get_pixel(x, y)
+					c = c * water_tint
+					img.set_pixel(x, y, c)
+		
+		# Create Tiled Source
+		var temp_tiled = Image.create(final_w, final_h, false, Image.FORMAT_RGBA8)
+		for tx in range(tiling):
+			for ty in range(tiling):
+				temp_tiled.blit_rect(img, Rect2i(0, 0, source_w, source_h), Vector2i(tx * source_w, ty * source_h))
 				
-	# Setup Decal Texture Initial State
-	if _frames.size() > 0 and decal:
-		decal.texture_albedo = _frames[0]
-		decal.texture_emission = _frames[0]
+		# Create Final Frame using Mask - C++ Speed!
+		var final_img = Image.create(final_w, final_h, false, Image.FORMAT_RGBA8) # Init 0,0,0,0
+		
+		# This uses final_mask's Alpha channel to cut out the shape
+		final_img.blit_rect_mask(temp_tiled, final_mask, Rect2i(0, 0, final_w, final_h), Vector2i(0, 0))
+		
+		_frames.append(ImageTexture.create_from_image(final_img))
+
+	# Setup Decal
+	if decal:
+		if _frames.size() > 0:
+			decal.texture_albedo = _frames[0]
+			decal.texture_emission = _frames[0]
+		
+		# Ensure no stray ORM
+		decal.texture_orm = null
 		decal.emission_energy = 1.0
 
 func _process(delta: float) -> void:
