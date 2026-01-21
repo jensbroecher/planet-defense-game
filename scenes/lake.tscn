@@ -20,6 +20,15 @@ height = 256
 color_ramp = SubResource("Gradient_mask")
 noise = SubResource("FastNoiseLite_mask")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_debug"]
+albedo_color = Color(1, 0, 1, 1)
+emission_enabled = true
+emission = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_debug"]
+material = SubResource("StandardMaterial3D_debug")
+size = Vector3(2, 50, 2)
+
 [node name="Lake" type="Node3D"]
 script = ExtResource("1_script")
 
@@ -51,3 +60,7 @@ stretch_mode = 1
 [node name="Decal" type="Decal" parent="."]
 size = Vector3(20, 20, 20)
 cull_mask = 2
+
+
+
+

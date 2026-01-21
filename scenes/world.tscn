@@ -8,9 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://c8j6y4v2m1oa" path="res://scenes/ui.tscn" id="3_ui"]
 [ext_resource type="Shader" uid="uid://ct0ckfs5qmenk" path="res://assets/materials/starfield_sky.gdshader" id="4_sky_shader"]
 [ext_resource type="Material" uid="uid://c5yskpomtxw17" path="res://assets/materials/moon_material.tres" id="5_moon_mat"]
-[ext_resource type="PackedScene" uid="uid://lensflare123" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
+[ext_resource type="PackedScene" path="res://scenes/effects/lens_flare.tscn" id="6_flare"]
 [ext_resource type="PackedScene" path="res://scenes/hill.tscn" id="7_hill"]
-[ext_resource type="PackedScene" path="res://scenes/lake.tscn" id="8_lake"]
+[ext_resource type="PackedScene" uid="uid://cx68k1a2b3c4" path="res://scenes/lake.tscn" id="8_lake"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_stars"]
 shader = ExtResource("4_sky_shader")
@@ -75,7 +75,9 @@ layers = 2
 mesh = SubResource("SphereMesh_k9m2n")
 
 [node name="Lake" parent="Planet" instance=ExtResource("8_lake")]
-transform = Transform3D(1, 0, 0, 0, 0.854556, 0.519358, 0, -0.519358, 0.854556, -14.061075, 32.84603, -16.161627)
+transform = Transform3D(1, 0, 0, 0, 0.854556, 0.519358, 0, -0.519358, 0.854556, -14.061075, 30.505272, -16.161627)
+water_tint = Color(0.24967316, 0.16073874, 0.15493101, 1)
+noise_frequency = 0.005
 
 [node name="HQ" parent="." instance=ExtResource("1_hq_struct")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0)

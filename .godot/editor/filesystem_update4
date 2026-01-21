@@ -1,5 +1,6 @@
-res://scripts/player.gd
-res://scenes/world.tscn
-res://scripts/hq.gd
 res://scripts/enemy_spawner.gd
+res://scripts/hq.gd
+res://scripts/player.gd
 res://scripts/lake.gd
+res://scenes/world.tscn
+res://scenes/lake.tscn
