@@ -1,0 +1,37 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+.import/
+export.cfg
+export_presets.cfg
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# Mono/C# ignores
+.mono/
+*.a
+*.lib
+*~
+*.so
+*.dylib
+*.dll
+*.pdb
+*.sln
+*.csproj
+*.fsproj
+*.jsproj
+*.vbproj
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# MacOS
+.DS_Store
